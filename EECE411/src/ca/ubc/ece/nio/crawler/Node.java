@@ -17,10 +17,7 @@ public class Node {
 	private String address;
 	private String hostName;
 	private String agent;
-	private String ultrapeers;
-	private String leaves;
 	private Status status;
-	private byte[] data;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public Node(String address, int portNum) {
@@ -60,9 +57,6 @@ public class Node {
 	public int getPortNum() { return portNum; }
 	public Status getStatus() { return this.status; }
 	public String getAgent() { return agent; }
-	public String getPeers() {return ultrapeers; }
-	public String getLeaves() { return leaves; }
-	public byte[] getData() { return data; }
 	
 	public String getStatusMessage() {
 		String message = "Unknown";
@@ -100,18 +94,6 @@ public class Node {
 	
 	public void setStatus(Status status) {
 		this.status = status;
-	}
-	
-	public void setData(byte[] data) {
-		this.data = data;
-	}
-	
-	public void setLeaves(String leaves){
-		this.leaves = leaves;
-	}
-	
-	public void setPeers(String peers){
-		this.ultrapeers = peers;
 	}
 	
 }
