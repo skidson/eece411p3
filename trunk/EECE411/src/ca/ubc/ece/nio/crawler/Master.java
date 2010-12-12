@@ -145,5 +145,9 @@ public class Master implements Runnable {
 		leafList.add(node);
 	}
 	
+	public void addNode(Node node) {
+		nodeList.add(node);
+	}
+	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 }
