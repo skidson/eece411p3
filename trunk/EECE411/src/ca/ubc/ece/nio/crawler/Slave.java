@@ -4,14 +4,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Vector;
 
-import ca.ubc.ece.nio.crawler.Master.ResultHandler;
-
 public class Slave implements Runnable {
 	// Constants
 	public static final int MS_TO_SEC = 1000;
 	
 	// Program variables
-	private Vector<String> ultraList, leafList;
+	private Vector<String> workList;
 	private NIOServer server;
 	
 	// Run settings
@@ -23,20 +21,18 @@ public class Slave implements Runnable {
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public Slave(boolean full, int timeout, int duration, String hostName, int portNum) {
-		ultraList = new Vector<String>();
-		leafList = new Vector<String>();
+		workList = new Vector<String>();
 		this.full = full;
 		this.timeout = timeout;
 		this.duration = duration;
 		this.hostName = hostName;
 		this.portNum = portNum;
-		this.server = new NIOServer(hostName, portNum, new ResultHandler());
+		this.server = new NIOServer(hostName, portNum, new SlaveHandler());
 	}
 	
 	public static void main(String args[]) {
 		// Default run settings
 		boolean full = false;
-		boolean verbose = false;
 		int timeout = 20;
 		int duration = 15;
 		String hostName = "localhost";
@@ -90,8 +86,7 @@ public class Slave implements Runnable {
 	
 	public void reset() {
 		// TODO clear this node's data and wait until further instruction
-		ultraList = new Vector<String>();
-		leafList = new Vector<String>();
+		workList = new Vector<String>();
 		idle();
 	}
 	
@@ -105,10 +100,5 @@ public class Slave implements Runnable {
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
-	public class ResultHandler implements DataHandler {
-		public void handle(byte[] data) {
-			// TODO specify how slave handles data
-		}
-	}
 
 }
