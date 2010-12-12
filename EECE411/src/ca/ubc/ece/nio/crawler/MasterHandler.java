@@ -3,22 +3,43 @@ package ca.ubc.ece.nio.crawler;
 import java.util.Vector;
 
 public class MasterHandler implements DataHandler {
+	// Constants
+	private static final int FRONT = 0;
+	
+	// Program variables
 	private Master owner;
 	private Vector<byte[]> dataList;
+	private Vector<Logger> workerList;
 	
+	/* ************************************ INITIALIZATION ************************************ */
 	public MasterHandler(Master owner) {
 		this.owner = owner;
+		dataList = new Vector<byte[]>();
+		workerList = new Vector<Logger>();
 	}
 	
+	/* ************************************ HELPER METHODS ************************************ */
 	public void handle(byte[] data) {
+		dataList.add(data);
 		// TODO parse data into node objects and log
 		// Can call Master public methods
 		// Can delegate workers to parse and log
-		// IPCache can be accessed with Master.ipCache
+		// IPCache can be accessed with owner.ipCache
 		// Use owner.addUltrapeer(String node) and owner.addLeaf(String node) to change lists
 	}
 	
-	private int parseData(byte[] data) {
+	/* Workers may be spawned or killed based on free memory */
+	public void spawnWorker() {
+		Logger logger = new Logger();
+		workerList.add(logger);
+		new Thread(logger).start();
+	}
+	
+	public void killWorker(int index) {
+		workerList.get(index).kill();
+	}
+	
+	private Node parseData(byte[] data) {
 		// TODO this needs to be cleaned up
 		// Parsing will now only be done at master.
 		// Requirements:
@@ -26,9 +47,8 @@ public class MasterHandler implements DataHandler {
 		// 2. Extract ultrapeers and leaves from data
 		// 3. Check each ultrapeer & leaf if cached
 		//		- if not cached, add to ultraList or leafList in the form hostName:portNum (as a string)
-		// 4. Cache this node's address
-		// 5. Construct Node object from data[]
-		// 6. Return the constructed Node object
+		// 4. Construct Node object from data[]
+		// 5. Return the constructed Node object
 		int status = 0;
 		String[] tempArray;
 		String[] tempArray2;
@@ -93,4 +113,27 @@ public class MasterHandler implements DataHandler {
 		{status = -1;}
 		return status;
 	}
+	
+	/* ************************************ EMBEDDED CLASSES ************************************ */
+	private class Logger implements Runnable {
+		boolean running = true;
+		
+		public void run() {
+			while(running) {
+				if (dataList.isEmpty()) {
+					try {
+						dataList.wait();
+					} catch (InterruptedException e) { continue; }
+				}
+				Node node = parseData(dataList.remove(FRONT));
+				owner.addNode(node);
+				owner.ipCache.cache(node.getAddress());
+			}
+		}
+		
+		public void kill() {
+			this.running = false;
+		}
+	}
+	
 }
