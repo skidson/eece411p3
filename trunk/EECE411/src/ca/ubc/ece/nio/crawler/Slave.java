@@ -27,7 +27,7 @@ public class Slave implements Runnable {
 		this.duration = duration;
 		this.hostName = hostName;
 		this.portNum = portNum;
-		this.server = new NIOServer(hostName, portNum, new SlaveHandler());
+		this.server = new NIOServer(hostName, portNum, new SlaveHandler(this));
 	}
 	
 	public static void main(String args[]) {
