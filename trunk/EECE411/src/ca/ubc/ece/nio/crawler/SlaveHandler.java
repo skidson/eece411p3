@@ -3,6 +3,9 @@ package ca.ubc.ece.nio.crawler;
 import java.util.Vector;
 
 public class SlaveHandler implements DataHandler {
+	// Constants
+	private static final int FRONT = 0;
+	
 	private Slave owner;
 	private Vector<byte[]> dataList;
 	private Vector<Relayer> workerList;
@@ -21,6 +24,7 @@ public class SlaveHandler implements DataHandler {
 		// TODO need to tack address and port onto data in format (may need to be done before this stage):
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
+		dataList.add(data);
 	}
 	
 	/* Workers may be spawned or killed based on free memory */
@@ -53,4 +57,5 @@ public class SlaveHandler implements DataHandler {
 			this.running = false;
 		}
 	}
+	
 }
