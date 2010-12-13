@@ -11,6 +11,7 @@ public class Slave implements Runnable {
 	// Program variables
 	private Vector<String> workList;
 	private NIOServer server;
+	private SlaveHandler handler;
 	
 	// Run settings
 	private boolean full;
@@ -18,6 +19,7 @@ public class Slave implements Runnable {
 	private int duration;
 	private String hostName;
 	private int portNum;
+	
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public Slave(boolean full, int timeout, int duration, String hostName, int portNum) {
@@ -27,7 +29,8 @@ public class Slave implements Runnable {
 		this.duration = duration;
 		this.hostName = hostName;
 		this.portNum = portNum;
-		this.server = new NIOServer(hostName, portNum, new SlaveHandler(this));
+		this.handler = new SlaveHandler(this);
+		this.server = new NIOServer(hostName, portNum, handler);
 	}
 	
 	public static void main(String args[]) {
@@ -73,7 +76,7 @@ public class Slave implements Runnable {
         }
 		new Thread(new Slave(full, timeout, duration, hostName, portNum)).start();
 	}
-
+	
 	public void run() {
 		new Thread(server).start();
 		try {
@@ -97,6 +100,10 @@ public class Slave implements Runnable {
 	public void kill() {
 		// Kill this node (cannot be woken up via java)
 		System.exit(0);
+	}
+	
+	public void spawnCrawler() {
+		
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
