@@ -2,6 +2,7 @@ package ca.ubc.ece.nio.crawler;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 import java.util.Vector;
 
 public class SlaveHandler implements DataHandler {
@@ -20,14 +21,20 @@ public class SlaveHandler implements DataHandler {
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
-	public void handle(byte[] data) {
+	public void handle(byte[] data, SelectionKey key) {
 		// TODO pass data directly to master
 		// Can call public Slave functions
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
-		synchronized(dataList){
-			dataList.add(data);
-			dataList.notifyAll();
+		SocketChannel socketChannel = (SocketChannel) key.channel();
+
+		if(socketChannel.socket().getInetAddress().equals(owner.getMasterAddress())){
+			owner.newWork(data);
+		}else {
+			synchronized(dataList) {
+				dataList.add(data);
+				dataList.notifyAll();
+			}
 		}
 	}
 	
@@ -36,7 +43,7 @@ public class SlaveHandler implements DataHandler {
 		byte[] failData = ("Address: " + attachment.getAddress() + 
 				"\r\nPort: " + attachment.getPort() + 
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
-		handle(failData);
+		handle(failData, key);
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {
@@ -67,7 +74,7 @@ public class SlaveHandler implements DataHandler {
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	private class Relayer implements Runnable {
 		boolean running = true;
-		int count = 0;
+//		int count = 0;
 		byte[] toBeSent = new byte[8192];
 		
 		public void run() {
@@ -80,14 +87,14 @@ public class SlaveHandler implements DataHandler {
 					} catch (InterruptedException e) { continue; }
 				}
 			}
-			
+		//TODO CAN BE BUFFERED SOME HOW 	
 			toBeSent = (toBeSent.toString() + dataList.remove(FRONT).toString() + "\r\n").getBytes();
-			count++;
+//			count++;
 			
-			if (count>10){
+//			if (count>10){
 				owner.sendToMaster(toBeSent);
-				count = 0;
-			}
+//				count = 0;
+//			}
 		}
 		
 		public void kill() {

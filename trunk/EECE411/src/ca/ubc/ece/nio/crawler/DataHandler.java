@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.channels.SelectionKey;
 
 public interface DataHandler {
-	public void handle(byte[] data);
+	public void handle(byte[] data, SelectionKey key);
 	public void killWorker(int index);
 	public void spawnWorker();
 	public int getNumWorkers();

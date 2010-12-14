@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 import java.util.Vector;
 
 public class MasterHandler implements DataHandler {
@@ -24,7 +25,7 @@ public class MasterHandler implements DataHandler {
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
-	public void handle(byte[] data) {
+	public void handle(byte[] data, SelectionKey Key) {
 		synchronized(dataList){
 			dataList.add(data);
 			dataList.notifyAll();
@@ -35,8 +36,9 @@ public class MasterHandler implements DataHandler {
 		
 	}
 	
-	public void finishRead(SelectionKey key) throws IOException {
-		// TODO don't think we need anything here
+	public void finishRead(SelectionKey key) throws IOException {	
+		SocketChannel socketChannel = (SocketChannel)key.channel();
+		owner.sendWork(owner.getWork(), socketChannel);
 	}
 	
 	public void finishWrite(SelectionKey key) throws IOException {
