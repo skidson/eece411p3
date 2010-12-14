@@ -59,7 +59,6 @@ public class MasterHandler implements DataHandler {
 		String Leaves = new String();
 		int startIndex;
 		int endIndex;        
-
 		startIndex = dataS.indexOf("Peers: ");
 		if (!(startIndex == -1)) {
 			endIndex = dataS.indexOf("\n", startIndex);

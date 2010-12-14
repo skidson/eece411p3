@@ -20,7 +20,6 @@ public class Slave implements Runnable {
 	private String hostName;
 	private int portNum;
 	
-	
 	/* ************************************ INITIALIZATION ************************************ */
 	public Slave(boolean full, int timeout, int duration, String hostName, int portNum) {
 		workList = new Vector<String>();
@@ -104,6 +103,10 @@ public class Slave implements Runnable {
 	
 	public void spawnCrawler() {
 		
+	}
+	
+	public void sendToMaster(byte[] data){
+		server.sendToMaster(data);
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
