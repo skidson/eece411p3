@@ -45,18 +45,6 @@ public class NodeController {
 	
 	/* ************************************ HELPER METHODS ************************************ */
 	
-	private Socket connect(WorkerNode node, int port) throws UnknownHostException, IOException {
-		Socket socket = null;
-		socket = new Socket(InetAddress.getByName(node.getAddress()), port);
-		return socket;
-	}
-	
-	private Socket connect(int index, int port) throws UnknownHostException, IOException {
-		Socket socket = null;
-		socket = new Socket(InetAddress.getByName(nodes.get(index).getAddress()), port);
-		return socket;
-	}
-	
 	public int getNumAlive() {
 		int count = 0;
 		for (WorkerNode node : nodes) {
@@ -81,8 +69,9 @@ public class NodeController {
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	private class WorkerNode {
 		private String address;
-		private boolean alive;
-		private long lastAccess;
+		private boolean alive = false;
+		private boolean working = false;
+		private long lastAccess = 0;
 		
 		public WorkerNode(String address) {
 			this.address = address;
@@ -94,6 +83,10 @@ public class NodeController {
 		
 		protected void setLastAccess(long time) {
 			this.lastAccess = time;
+		}
+		
+		public void setWorking(boolean working) {
+			this.working = working;
 		}
 		
 		public String getAddress() { return this.address; }

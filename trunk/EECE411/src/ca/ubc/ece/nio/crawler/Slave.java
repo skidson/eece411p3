@@ -112,7 +112,7 @@ public class Slave implements Runnable, CrawlerNode {
 		} catch (InterruptedException e) {}
 	}
 	
-	public void start() {
+	public void wake() {
 		synchronized(server) {
 			server.notifyAll();
 		}
@@ -132,12 +132,20 @@ public class Slave implements Runnable, CrawlerNode {
 		server.sendToMaster(data);
 	}
 	
+	public void addUltrapeer(String node) {
+		server.addUltrapeer(node);
+	}
+	
+	public void addLeaf(String node) {
+		server.addLeaf(node);
+	}
+	
 	public void newWork(byte[] data){
 		String[] node = new String(data).split(";");
 		if(node[1].equals("U"))
-			ultraList.add(node);
+			addUltrapeer(node[0]);
 		else
-			leafList.add(node);
+			addLeaf(node[0]);
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
@@ -155,7 +163,7 @@ public class Slave implements Runnable, CrawlerNode {
 				try {
 					Socket socket = listenerServer.accept();
 					// TODO can design custom Action class for use here to allow remote control
-					start(); // Break from idle() loop
+					wake(); // Break from idle() loop
 				} catch (IOException e) {}
 			}
 		}

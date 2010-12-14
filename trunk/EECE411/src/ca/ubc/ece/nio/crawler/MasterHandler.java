@@ -33,7 +33,11 @@ public class MasterHandler implements DataHandler {
 	}
 	
 	public void connectFailed(SelectionKey key) {
-		
+		// TODO unable to contact node, wake another
+	}
+	
+	public boolean startRead(byte[] data) {
+		return true;
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {	

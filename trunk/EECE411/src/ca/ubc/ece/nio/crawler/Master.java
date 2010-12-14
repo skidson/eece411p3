@@ -11,6 +11,7 @@ public class Master implements Runnable, CrawlerNode {
 	private static final int MS_TO_SEC = 1000;
 	private static final String NODE_LIST = "node_list_all";
 	public static final int MANAGEMENT_PORT = 1377;
+	public static final int NUM_CRAWLERS = 5;
 	
 	// Run settings
 	private boolean full;
@@ -27,6 +28,7 @@ public class Master implements Runnable, CrawlerNode {
 	private MasterHandler handler;
 	public IPCache ipCache;
 	private String masterAddress;
+	private Vector<String> wakeList;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	
@@ -40,6 +42,7 @@ public class Master implements Runnable, CrawlerNode {
 		this.handler = new MasterHandler(this);
 		this.server = new NIOServer(hostName, portNum, handler, this);
 		this.nodeList = new Vector<Node>();
+		this.wakeList = new Vector<String>();
 		this.ipCache = new IPCache();
 		this.controller = new NodeController(NODE_LIST);
 	}
@@ -93,6 +96,9 @@ public class Master implements Runnable, CrawlerNode {
 	
 	public void run() {
 		new Thread(server).start();
+		for (int i = 0; i < NUM_CRAWLERS; i++)
+			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), server));
+		
 		while(true) {
 			// TODO provide commandline interface
 			System.out.print("\r\ncrawler>$ ");
@@ -151,7 +157,7 @@ public class Master implements Runnable, CrawlerNode {
 		return masterAddress;
 	}
 	
-	public void start() {
+	public void wake() {
 		synchronized(server) {
 			server.notifyAll();
 		}
