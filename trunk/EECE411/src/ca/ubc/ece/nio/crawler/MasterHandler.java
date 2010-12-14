@@ -44,16 +44,25 @@ public class MasterHandler implements DataHandler {
 		//		- if not cached, add to ultraList or leafList in the form hostName:portNum (as a string)
 		// 4. Construct Node object from data[]
 		// 5. Return the constructed Node object
-		int status = 0;
-		String[] tempArray;
-		String[] tempArray2;
-		String[] readArray;
-		String ipPort;
+		Node tempnode = null;
+		String[] tempArray, tempArray2, readArray;
+		String ipPort, Address, Port, addressPort;
 		String dataS = new String(data);
 		String Peers = new String();
 		String Leaves = new String();
-		int startIndex;
-		int endIndex;        
+		int startIndex, portNum, endIndex;        
+		
+		startIndex = dataS.indexOf("Address: ");
+		endIndex = dataS.indexOf("\n", startIndex);
+		Address = dataS.substring(startIndex+9, endIndex);
+		
+		startIndex = dataS.indexOf("Port: ");
+		endIndex = dataS.indexOf("\n", startIndex);
+		Port = dataS.substring(startIndex+6, endIndex);
+		tempnode = new Node(Address, Integer.parseInt(Port));
+		
+		
+		
 		startIndex = dataS.indexOf("Peers: ");
 		if (!(startIndex == -1)) {
 			endIndex = dataS.indexOf("\n", startIndex);
@@ -64,20 +73,16 @@ public class MasterHandler implements DataHandler {
 				for (int j = 0; j < tempArray.length; j++) {
 					ipPort = tempArray[j];
 					readArray = ipPort.split(":");
-					if (!(ipCache.isCached(readArray[0].toString()))) {
+					if (!(owner.ipCache.isCached(readArray[0].toString()))) {
 						readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 						portNum = Integer.parseInt(readArray[1]);
-						Node tempnode = new Node(readArray[0], portNum);
-						ultraList.add(tempnode);
-						synchronized(ultraList){
-							ultraList.notifyAll();
-						}
-						ipCache.cache(readArray[0]);
-						dumpList.add(tempnode);
+						addressPort = readArray[1] + ":" + portNum;
+						owner.addUltrapeer(addressPort);
+						
 					}
 				}	
-			} else status = -1;
-		} else status = -1;
+			} 
+		} 
 		startIndex = dataS.indexOf("Leaves: ");
 		if (!(startIndex == -1)) {
 			endIndex = dataS.indexOf("\n", startIndex);
@@ -90,22 +95,19 @@ public class MasterHandler implements DataHandler {
 					for (int k = 0; k< tempArray2.length; k++) {
 						ipPort = tempArray2[k];
 						readArray = ipPort.split(":");
-						if (!(ipCache.isCached(readArray[0].toString()))) { 
+						if (!(owner.ipCache.isCached(readArray[0].toString()))) { 
 							readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 							int portNum2 = Integer.parseInt(readArray[1]);
-
-							Node tempnode = new Node(readArray[0], portNum2);
-							leafList.add(tempnode);
-							//System.out.println(readArray[0]);
-							ipCache.cache(readArray[0]);
-							dumpList.add(tempnode);
+							addressPort = readArray[1] + ":" + portNum2;
+							
+							
+							owner.addLeaf(addressPort);
 						}
 					}
 				}
-			} else {status = -1;}
-		} else 
-		{status = -1;}
-		return status;
+			} 
+		} 
+		return tempnode;
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
