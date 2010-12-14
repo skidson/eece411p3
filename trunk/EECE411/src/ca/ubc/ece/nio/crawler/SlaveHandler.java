@@ -29,6 +29,9 @@ public class SlaveHandler implements DataHandler {
 			dataList.notifyAll();
 		}
 		
+		synchronized(dataList) {
+			dataList.notifyAll();
+		}
 	}
 	
 	/* Workers may be spawned or killed based on free memory */

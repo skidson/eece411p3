@@ -1,17 +1,21 @@
 package ca.ubc.ece.nio.crawler;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Vector;
 
-public class Slave implements Runnable {
+public class Slave implements Runnable, CrawlerNode {
 	// Constants
 	public static final int MS_TO_SEC = 1000;
+	public static final int NIO_PORT = 1337;
+	public static final int MANAGEMENT_PORT = 1377;
 	
 	// Program variables
-	private Vector<String> workList;
 	private NIOServer server;
 	private SlaveHandler handler;
+	private boolean running = true;
 	
 	// Run settings
 	private boolean full;
@@ -19,17 +23,21 @@ public class Slave implements Runnable {
 	private int duration;
 	private String hostName;
 	private int portNum;
+	private String masterAddress;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public Slave(boolean full, int timeout, int duration, String hostName, int portNum) {
-		workList = new Vector<String>();
+		init(full, timeout, duration, hostName, portNum);
+	}
+	
+	private void init(boolean full, int timeout, int duration, String hostName, int portNum) {
 		this.full = full;
 		this.timeout = timeout;
 		this.duration = duration;
 		this.hostName = hostName;
 		this.portNum = portNum;
 		this.handler = new SlaveHandler(this);
-		this.server = new NIOServer(hostName, portNum, handler);
+		this.server = new NIOServer(hostName, portNum, handler, this);
 	}
 	
 	public static void main(String args[]) {
@@ -77,32 +85,49 @@ public class Slave implements Runnable {
 	}
 	
 	public void run() {
-		new Thread(server).start();
-		try {
-			server.wait();
-		} catch (InterruptedException e) {}
-		reset();
+		while(running) {
+			idle(); // Idle until connection from master
+			new Thread(server).start();
+			server.spawnCrawler();
+			server.spawnCrawler();
+			reset(); // clear this run's data
+		}
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
 	
 	public void reset() {
 		// TODO clear this node's data and wait until further instruction
-		workList = new Vector<String>();
-		idle();
+		this.handler = null;
+//		this.server.reset(); // TODO write NIOServer reset()
+		try {
+			// Allow for other threads to shutdown
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {}
+		init(full, timeout, duration, hostName, portNum);
+		run();
 	}
 	
 	public void idle() {
-		
+		try {
+			server.wait();
+		} catch (InterruptedException e) {}
+	}
+	
+	public void start() {
+		synchronized(server) {
+			server.notifyAll();
+		}
 	}
 	
 	public void kill() {
-		// Kill this node (cannot be woken up via java)
+		// Kill this node, restart requires bash script or manual configuraton
+		running = false;
 		System.exit(0);
 	}
 	
-	public void spawnCrawler() {
-		
+	public String getMasterAddress() {
+		return masterAddress;
 	}
 	
 	public void sendToMaster(byte[] data){
@@ -110,5 +135,23 @@ public class Slave implements Runnable {
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
-
+	public class MasterListener implements Runnable {
+		ServerSocket listenerServer;
+		
+		public MasterListener(int portNum) {
+			try {
+				listenerServer = new ServerSocket(portNum);
+			} catch (IOException e) {}
+		}
+		
+		public void run() {
+			while(true) {
+				try {
+					Socket socket = listenerServer.accept();
+					// TODO can design custom Action class for use here to allow remote control
+					start(); // Break from idle() loop
+				} catch (IOException e) {}
+			}
+		}
+	}
 }
