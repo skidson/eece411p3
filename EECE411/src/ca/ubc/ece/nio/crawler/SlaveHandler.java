@@ -1,5 +1,7 @@
 package ca.ubc.ece.nio.crawler;
 
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
 import java.util.Vector;
 
 public class SlaveHandler implements DataHandler {
@@ -27,10 +29,22 @@ public class SlaveHandler implements DataHandler {
 			dataList.add(data);
 			dataList.notifyAll();
 		}
-		
-		synchronized(dataList) {
-			dataList.notifyAll();
-		}
+	}
+	
+	public void finishRead(SelectionKey key) throws IOException {
+		key.channel().close();
+	}
+	
+	public void connectFailed(SelectionKey key) {
+		Attachment attachment = (Attachment) key.attachment();
+		byte[] failData = ("Address: " + attachment.getAddress() + 
+				"\r\nPort: " + attachment.getPort() + 
+				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
+		handle(failData);
+	}
+	
+	public void finishWrite(SelectionKey key) {
+		// TODO don't think we need anything here
 	}
 	
 	/* Workers may be spawned or killed based on free memory */

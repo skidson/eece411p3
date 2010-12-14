@@ -157,39 +157,28 @@ public class NIOServer implements Runnable {
 		updateAttachment(key);
 		Attachment attachment = (Attachment) key.attachment();
 		
-		if (attachment.getAddress().equals(owner.getMasterAddress())) {
-			// TODO wake node
-			owner.start();
-			key.cancel();
-			return;
-		}
-			
 		Status status = Status.CONNECTED;
 		try {
 			socketChannel.finishConnect();
 		} catch (SocketTimeoutException e) {
 			status = Status.TIMEOUT;
-			key.cancel();
 		} catch (UnknownHostException e) {
 			status = Status.UNROUTABLE;
-			key.cancel();
 		} catch (ConnectException e) {
 			status = Status.REFUSED;
-			key.cancel();
 		} catch (IOException e) {
 			status = Status.INTERNAL;
-			key.cancel();
 		}
 		
 		attachment.setStatus(status);
+		
 		if (status != Status.CONNECTED) {
 			crawlerList.get(attachment.getIdentifier()).abort();
-			byte[] failData = ("Address: " + attachment.getAddress() + 
-					"\r\nPort: " + attachment.getPort() + 
-					"\r\nStatus: " + status.toString()).getBytes();
-			resultHandler.handle(failData);
+			resultHandler.connectFailed(key);
+			key.cancel();
 			return;
 		}
+		
 		crawlerList.get(attachment.getIdentifier()).wake();
 	}
 	
@@ -210,14 +199,12 @@ public class NIOServer implements Runnable {
 			socketChannel.close();
 			return;
 		}
-		
 		Attachment attachment = (Attachment) key.attachment();
-		key.channel().close();
 		byte[] data = addTag(attachment, (dataBuffer.toString().getBytes()));
 		resultHandler.handle(data);
+		resultHandler.finishRead(key);
 		
 		crawlerList.get(attachment.getIdentifier()).wake(); // potential abort problems here
-		System.out.println();
 	}
 	
 	private void write(SelectionKey key) throws IOException {
