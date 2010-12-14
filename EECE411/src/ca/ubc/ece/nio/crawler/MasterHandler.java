@@ -21,11 +21,6 @@ public class MasterHandler implements DataHandler {
 	/* ************************************ HELPER METHODS ************************************ */
 	public void handle(byte[] data) {
 		dataList.add(data);
-		// TODO parse data into node objects and log
-		// Can call Master public methods
-		// Can delegate workers to parse and log
-		// IPCache can be accessed with owner.ipCache
-		// Use owner.addUltrapeer(String node) and owner.addLeaf(String node) to change lists
 	}
 	
 	/* Workers may be spawned or killed based on free memory */
@@ -126,7 +121,7 @@ public class MasterHandler implements DataHandler {
 				}
 				Node node = parseData(dataList.remove(FRONT));
 				owner.addNode(node);
-				owner.ipCache.cache(node.getAddress());
+//				owner.ipCache.cache(node.getAddress());
 			}
 		}
 		

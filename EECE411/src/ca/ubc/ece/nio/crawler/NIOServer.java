@@ -38,15 +38,17 @@ public class NIOServer implements Runnable {
 	private Vector<String> ultraList, leafList;
 	private DataHandler resultHandler;
 	private Vector<Crawler> crawlerList;
+	private CrawlerNode owner;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	
-	public NIOServer(String hostName, int portNum, DataHandler resultHandler) {
+	public NIOServer(String hostName, int portNum, DataHandler resultHandler, CrawlerNode owner) {
 		this.hostName = hostName;
 		this.portNum = portNum;
 		this.resultHandler = resultHandler;
 		this.ultraList = new Vector<String>();
 		this.leafList = new Vector<String>();
+		this.owner = owner;
 		dataBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
 		changeRequests = new Vector<ChangeRequest>();
@@ -150,6 +152,14 @@ public class NIOServer implements Runnable {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 		updateAttachment(key);
 		Attachment attachment = (Attachment) key.attachment();
+		
+		if (attachment.getAddress().equals(owner.getMasterAddress())) {
+			owner.start();
+			key.cancel();
+			return;
+		}
+			
+			
 		Status status = Status.CONNECTED;
 		try {
 			socketChannel.finishConnect();
@@ -244,9 +254,22 @@ public class NIOServer implements Runnable {
 		selector.wakeup();
 	}
 	
+	public void delegate() {
+		
+	}
+	
+	public void addUltrapeer(String node) {
+		ultraList.add(node);
+	}
+	
+	public void adLeaf(String node) {
+		leafList.add(node);
+	}
+	
 	public void sendToMaster(byte[] data){
 		send(masterSocketChannel, data);
 	}
+
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	
 	private class ChangeRequest {

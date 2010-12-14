@@ -1,18 +1,15 @@
 package ca.ubc.ece.nio.crawler;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
 import java.util.Vector;
 
-public class Master implements Runnable {
+public class Master implements Runnable, CrawlerNode {
 	// Constants
 	private static final int MS_TO_SEC = 1000;
-	private static final int NODE_COUNT = 550;
+	private static final String NODE_LIST = "node_list_all";
+	public static final int MANAGEMENT_PORT = 1377;
 	
 	// Run settings
 	private boolean full;
@@ -25,10 +22,10 @@ public class Master implements Runnable {
 	// Program variables
 	private NIOServer server;
 	private NodeController controller;
-	private Vector<String> ultraList, leafList;
 	private Vector<Node> nodeList;
-	
+	private MasterHandler handler;
 	public IPCache ipCache;
+	private String masterAddress;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	
@@ -39,24 +36,11 @@ public class Master implements Runnable {
 		this.duration = duration;
 		this.hostName = hostName;
 		this.portNum = portNum;
-		this.server = new NIOServer(hostName, portNum, new MasterHandler(this));
+		this.handler = new MasterHandler(this);
+		this.server = new NIOServer(hostName, portNum, handler, this);
 		this.nodeList = new Vector<Node>();
 		this.ipCache = new IPCache();
-		BufferedReader br;
-		String[] allNodes = new String[NODE_COUNT];
-		try {
-			br = new BufferedReader(new FileReader("node_list_all"));
-			for (int i = 0; i < allNodes.length; i++) {
-				String newLine = br.readLine();
-				if (newLine != null) {
-					allNodes[i] = newLine;
-					System.out.println(allNodes[i]);
-				}
-			}
-		} catch (FileNotFoundException e) {
-			System.err.println("Error: Could not find node list.");
-		} catch (IOException e) {}
-		controller = new NodeController(allNodes);
+		this.controller = new NodeController(NODE_LIST);
 	}
 	
 	public static void main(String[] args) {
@@ -138,15 +122,30 @@ public class Master implements Runnable {
 	}
 	
 	public void addUltrapeer(String node) {
-		ultraList.add(node);
+		server.addUltrapeer(node);
 	}
 	
 	public void addLeaf(String node) {
-		leafList.add(node);
+		server.addUltrapeer(node);
 	}
 	
 	public void addNode(Node node) {
 		nodeList.add(node);
+	}
+	
+	public boolean wakeNode(int index) {
+		controller.getAddress(index);
+		return false;
+	}
+	
+	public String getMasterAddress() {
+		return masterAddress;
+	}
+	
+	public void start() {
+		synchronized(server) {
+			server.notifyAll();
+		}
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
