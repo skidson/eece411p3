@@ -27,10 +27,6 @@ public class Slave implements Runnable, CrawlerNode {
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public Slave(boolean full, int timeout, int duration, String hostName, int portNum) {
-		init(full, timeout, duration, hostName, portNum);
-	}
-	
-	private void init(boolean full, int timeout, int duration, String hostName, int portNum) {
 		this.full = full;
 		this.timeout = timeout;
 		this.duration = duration;
@@ -97,14 +93,15 @@ public class Slave implements Runnable, CrawlerNode {
 	/* ************************************ HELPER METHODS ************************************ */
 	
 	public void reset() {
-		// TODO clear this node's data and wait until further instruction
-		this.handler = null;
-//		this.server.reset(); // TODO write NIOServer reset()
+		this.server.reset();
 		try {
 			// Allow for other threads to shutdown
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {}
-		init(full, timeout, duration, hostName, portNum);
+		int workerCount = handler.getNumWorkers();
+		for(int i = 0; i < workerCount; i++)
+			handler.killWorker(0);
+		this.handler = new SlaveHandler(this);
 		run();
 	}
 	

@@ -21,7 +21,6 @@ public class SlaveHandler implements DataHandler {
 	public void handle(byte[] data) {
 		// TODO pass data directly to master
 		// Can call public Slave functions
-		// TODO need to tack address and port onto data in format (may need to be done before this stage):
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
 		synchronized(dataList){
@@ -43,6 +42,10 @@ public class SlaveHandler implements DataHandler {
 		Relayer relayer = new Relayer();
 		workerList.add(relayer);
 		new Thread(relayer).start();
+	}
+	
+	public int getNumWorkers() {
+		return workerList.size();
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */

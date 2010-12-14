@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -40,7 +39,7 @@ public class NodeController {
 				}
 			}
 		} catch (FileNotFoundException e) {
-			System.err.println("Error: Could not find file 'filename'");
+			System.err.println("Error: Could not find file '" + filename + "'");
 		} catch (IOException e) {}
 	}
 	
@@ -83,22 +82,22 @@ public class NodeController {
 	private class WorkerNode {
 		private String address;
 		private boolean alive;
-		private long latency;
+		private long lastAccess;
 		
 		public WorkerNode(String address) {
 			this.address = address;
-		}
-		
-		protected void setLatency(long latency) {
-			this.latency = latency;
 		}
 		
 		protected void setAlive(boolean alive) {
 			this.alive = alive;
 		}
 		
+		protected void setLastAccess(long time) {
+			this.lastAccess = time;
+		}
+		
 		public String getAddress() { return this.address; }
-		public long getLatency() { return this.latency; }
+		public long getLastAccess() { return this.lastAccess; }
 		public boolean isAlive() { return this.alive; }
 	}
 	
