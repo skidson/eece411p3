@@ -31,10 +31,6 @@ public class SlaveHandler implements DataHandler {
 		}
 	}
 	
-	public void finishRead(SelectionKey key) throws IOException {
-		key.channel().close();
-	}
-	
 	public void connectFailed(SelectionKey key) {
 		Attachment attachment = (Attachment) key.attachment();
 		byte[] failData = ("Address: " + attachment.getAddress() + 
@@ -42,6 +38,12 @@ public class SlaveHandler implements DataHandler {
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
 		handle(failData);
 	}
+	
+	public void finishRead(SelectionKey key) throws IOException {
+		key.channel().close();
+	}
+	
+	
 	
 	public void finishWrite(SelectionKey key) {
 		// TODO don't think we need anything here

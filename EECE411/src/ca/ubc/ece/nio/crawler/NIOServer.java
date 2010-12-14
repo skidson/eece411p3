@@ -20,7 +20,6 @@ import java.util.Vector;
 
 public class NIOServer implements Runnable {
 	// Constants
-	public static final String REQUEST = "GNUTELLA CONNECT/0.6\r\n" + "User-Agent: UBCECE (crawl)\r\n" + "Query-Routing: 0.2\r\n" + "X-Ultrapeer: False\r\n" + "Crawler: 0.1\r\n" + "\r\n";
 	private static final int BUFFER_SIZE = 8192;
 	private static final int FRONT = 0;
 
@@ -129,10 +128,13 @@ public class NIOServer implements Runnable {
 		return((data.toString()+ dataBuffer.toString() + addData.toString()).getBytes());
 	}
 	
-	public void spawnCrawler() {
-		Crawler crawler = new Crawler(crawlerList.size());
+	public void addCrawler(Crawler crawler) {
 		crawlerList.add(crawler);
 		new Thread(crawler).start();
+	}
+	
+	public int getNumCrawlers() {
+		return crawlerList.size();
 	}
 	
 	private SocketChannel createConnection(String address, int port, int id) throws IOException{
@@ -252,6 +254,14 @@ public class NIOServer implements Runnable {
 		leafList.add(node);
 	}
 	
+	public String getWork() {
+		if (!ultraList.isEmpty())
+			return ultraList.remove(FRONT);
+		else if (!leafList.isEmpty())
+			return leafList.remove(FRONT);
+		else
+			return null;
+	}
 	public void sendToMaster(byte[] data){
 		send(masterSocketChannel, data);
 	}
@@ -286,78 +296,6 @@ public class NIOServer implements Runnable {
 		public int getType() { return type; }
 		public int getOps() { return ops; }
 		public int getId() { return id; }
-	}
-	
-	public class Crawler implements Runnable {
-		private String[] node;
-		private boolean abort = false;
-		private boolean running = true;
-		private SocketChannel socketChannel;
-		private Object sync; //Used to determine which crawler needs to handle stuff
-		private int id;
-		
-		public Crawler(int id){
-			this.sync = new Object();
-			this.id = id;
-		}
-		
-		public void abort() {
-			this.abort = true;
-		}
-		
-		public void kill() {
-			this.running = false;
-		}
-		
-		public void wake() {
-			synchronized(sync) {
-				sync.notifyAll();
-			}
-		}
-		
-		public void run(){
-			while(running){
-				if(ultraList.size() > 0)
-					node = ultraList.remove(FRONT).split(":");
-				else if(leafList.size() > 0)
-					node = leafList.remove(FRONT).split(":");
-				else{
-					// Wait for more nodes
-					synchronized(ultraList) {
-						try {
-							System.out.println("crawler : " + sync + " waiting");
-							ultraList.wait();
-						} catch (InterruptedException e) {}
-					}
-				}
-				try {
-					socketChannel = createConnection(node[0], Integer.parseInt(node[1]), id);
-				} catch (IOException e) {}
-				// Wait for connection to finish before writing	
-				synchronized(sync) {
-					try {
-						System.out.println("crawler : " + sync + " waiting"); // debug
-						sync.wait();
-					} catch (InterruptedException e) {}
-				}
-				
-				if(abort) {
-					abort = false;
-					continue;
-				}
-				
-				System.out.println("Attempting to write  " + sync); // debug
-			    send(socketChannel, REQUEST.getBytes());
-
-				// Wait for this connection to be closed so we can open another
-				synchronized(sync) {
-					try {
-						System.out.println("Crawler : " + sync + " waiting");
-						sync.wait();
-					} catch (InterruptedException e) {}
-				}
-			}	
-		}
 	}
 	
 }
