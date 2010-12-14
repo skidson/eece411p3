@@ -11,6 +11,7 @@ public class Slave implements Runnable, CrawlerNode {
 	public static final int MS_TO_SEC = 1000;
 	public static final int NIO_PORT = 1337;
 	public static final int MANAGEMENT_PORT = 1377;
+	public static final int NUM_CRAWLERS = 2;
 	
 	// Program variables
 	private NIOServer server;
@@ -84,8 +85,8 @@ public class Slave implements Runnable, CrawlerNode {
 		while(running) {
 			idle(); // Idle until connection from master
 			new Thread(server).start();
-			server.spawnCrawler();
-			server.spawnCrawler();
+			for (int i = 0; i < NUM_CRAWLERS; i++)
+				server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), this));
 			reset(); // clear this run's data
 		}
 	}
@@ -121,6 +122,10 @@ public class Slave implements Runnable, CrawlerNode {
 		// Kill this node, restart requires bash script or manual configuraton
 		running = false;
 		System.exit(0);
+	}
+	
+	public String getWork() {
+		return server.getWork();
 	}
 	
 	public String getMasterAddress() {
