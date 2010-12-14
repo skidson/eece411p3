@@ -14,12 +14,12 @@ public class GnutellaCrawler implements Crawler {
 	private SocketChannel socketChannel;
 	private Object sync; //Used to determine which crawler needs to handle stuff
 	private int id;
-	private Slave owner;
+	private NIOServer server;
 
-	public GnutellaCrawler(int id, Slave owner){
+	public GnutellaCrawler(int id, NIOServer server){
 		this.sync = new Object();
 		this.id = id;
-		this.owner = owner;
+		this.server = server;
 	}
 
 	public void abort() {
@@ -38,14 +38,14 @@ public class GnutellaCrawler implements Crawler {
 
 	public void run(){
 		while(running){
-			String address = owner.getWork();
+			String address = server.getWork();
 			if (address != null)
 				node = address.split(":");
 			else
 				continue; // TODO this might cause super processor consumption
 			
 			try {
-				socketChannel = createConnection(node[0], Integer.parseInt(node[1]), id);
+				socketChannel = server.createConnection(node[0], Integer.parseInt(node[1]), id);
 			} catch (IOException e) {}
 			// Wait for connection to finish before writing	
 			synchronized(sync) {
@@ -61,7 +61,7 @@ public class GnutellaCrawler implements Crawler {
 			}
 
 			System.out.println("Attempting to write  " + sync); // debug
-			send(socketChannel, REQUEST.getBytes());
+			server.send(socketChannel, REQUEST.getBytes());
 
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {

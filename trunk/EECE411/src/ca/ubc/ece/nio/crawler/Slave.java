@@ -86,7 +86,7 @@ public class Slave implements Runnable, CrawlerNode {
 			idle(); // Idle until connection from master
 			new Thread(server).start();
 			for (int i = 0; i < NUM_CRAWLERS; i++)
-				server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), this));
+				server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), server));
 			reset(); // clear this run's data
 		}
 	}
@@ -122,10 +122,6 @@ public class Slave implements Runnable, CrawlerNode {
 		// Kill this node, restart requires bash script or manual configuraton
 		running = false;
 		System.exit(0);
-	}
-	
-	public String getWork() {
-		return server.getWork();
 	}
 	
 	public String getMasterAddress() {
