@@ -3,6 +3,7 @@ package ca.ubc.ece.nio.crawler;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.channels.SelectionKey;
 import java.util.Vector;
 
 public class MasterHandler implements DataHandler {
@@ -24,7 +25,22 @@ public class MasterHandler implements DataHandler {
 	
 	/* ************************************ HELPER METHODS ************************************ */
 	public void handle(byte[] data) {
-		dataList.add(data);
+		synchronized(dataList){
+			dataList.add(data);
+			dataList.notifyAll();
+		}
+	}
+	
+	public void connectFailed(SelectionKey key) {
+		
+	}
+	
+	public void finishRead(SelectionKey key) throws IOException {
+		// TODO don't think we need anything here
+	}
+	
+	public void finishWrite(SelectionKey key) throws IOException {
+		
 	}
 	
 	/* Workers may be spawned or killed based on free memory */
