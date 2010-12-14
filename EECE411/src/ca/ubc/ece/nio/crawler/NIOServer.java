@@ -137,7 +137,7 @@ public class NIOServer implements Runnable {
 		return crawlerList.size();
 	}
 	
-	private SocketChannel createConnection(String address, int port, int id) throws IOException{
+	public SocketChannel createConnection(String address, int port, int id) throws IOException{
 		SocketChannel socketChannel = SocketChannel.open();
 	    socketChannel.configureBlocking(false);
 	  
@@ -232,7 +232,7 @@ public class NIOServer implements Runnable {
 		}
 	}
 	
-	private void send(SocketChannel socket, byte[] data) {
+	public void send(SocketChannel socket, byte[] data) {
 		changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
 		
 		synchronized(pendingData) {
