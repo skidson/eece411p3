@@ -2,6 +2,7 @@ package ca.ubc.ece.nio.crawler;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -31,6 +32,7 @@ public class NIOServer implements Runnable {
 	private Selector selector;
 	private ServerSocketChannel serverChannel;
 	private ByteBuffer dataBuffer;
+	private SocketChannel masterSocketChannel;
 	private Map<SocketChannel, List<ByteBuffer>> pendingData;
 	private List<ChangeRequest> changeRequests;
 	private Vector<String> ultraList, leafList;
@@ -54,7 +56,9 @@ public class NIOServer implements Runnable {
 			serverChannel.configureBlocking(false);
 			serverChannel.socket().bind(new InetSocketAddress(hostName, portNum));
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+			masterSocketChannel = createConnection(InetAddress.getLocalHost().getHostName(), 9090, 5);
 		} catch (IOException e) {}
+		
 	}
 	
 	public void run() {
@@ -240,6 +244,9 @@ public class NIOServer implements Runnable {
 		selector.wakeup();
 	}
 	
+	public void sendToMaster(byte[] data){
+		send(masterSocketChannel, data);
+	}
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	
 	private class ChangeRequest {

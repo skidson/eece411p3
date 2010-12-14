@@ -24,7 +24,11 @@ public class SlaveHandler implements DataHandler {
 		// TODO need to tack address and port onto data in format (may need to be done before this stage):
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
-		dataList.add(data);
+		synchronized(dataList){
+			dataList.add(data);
+			dataList.notifyAll();
+		}
+		
 	}
 	
 	/* Workers may be spawned or killed based on free memory */
@@ -41,16 +45,27 @@ public class SlaveHandler implements DataHandler {
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	private class Relayer implements Runnable {
 		boolean running = true;
+		int count = 0;
+		byte[] toBeSent = new byte[8192];
 		
 		public void run() {
 			while(running) {
 				if (dataList.isEmpty()) {
 					try {
-						dataList.wait();
+						synchronized(dataList){
+							dataList.wait();
+						}
 					} catch (InterruptedException e) { continue; }
 				}
 			}
-			// TODO NIO send data to master
+			
+			toBeSent = (toBeSent.toString() + dataList.remove(FRONT).toString() + "\r\n").getBytes();
+			count++;
+			
+			if (count>10){
+				owner.sendToMaster(toBeSent);
+				count = 0;
+			}
 		}
 		
 		public void kill() {
