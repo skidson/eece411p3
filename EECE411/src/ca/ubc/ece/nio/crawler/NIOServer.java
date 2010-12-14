@@ -34,7 +34,8 @@ public class NIOServer implements Runnable {
 	private SocketChannel masterSocketChannel;
 	private Map<SocketChannel, List<ByteBuffer>> pendingData;
 	private List<ChangeRequest> changeRequests;
-	private Vector<String> ultraList, leafList;
+	private Vector<String> ultraList, leafList, wakeList;
+	public Object workSync, wakeSync;
 	private DataHandler resultHandler;
 	private Vector<Crawler> crawlerList;
 	private CrawlerNode owner;
@@ -46,6 +47,8 @@ public class NIOServer implements Runnable {
 		this.portNum = portNum;
 		this.owner = owner;
 		this.resultHandler = resultHandler;
+		this.workSync = new Object();
+		this.wakeSync = new Object();
 		init();
 		
 		try {
@@ -137,6 +140,14 @@ public class NIOServer implements Runnable {
 		return crawlerList.size();
 	}
 	
+	public int getPort() {
+		return portNum;
+	}
+	
+	public String getHostName() {
+		return hostName;
+	}
+	
 	public SocketChannel createConnection(String address, int port, int id) throws IOException{
 		SocketChannel socketChannel = SocketChannel.open();
 	    socketChannel.configureBlocking(false);
@@ -201,8 +212,14 @@ public class NIOServer implements Runnable {
 			socketChannel.close();
 			return;
 		}
+		
+		if(!resultHandler.startRead(dataBuffer.array())) {
+			owner.wake();
+			return;
+		}
+		
 		Attachment attachment = (Attachment) key.attachment();
-		byte[] data = addTag(attachment, (dataBuffer.toString().getBytes()));
+		byte[] data = addTag(attachment, (dataBuffer.array()));
 		resultHandler.handle(data, key);
 		resultHandler.finishRead(key);
 		
@@ -248,10 +265,16 @@ public class NIOServer implements Runnable {
 	
 	public void addUltrapeer(String node) {
 		ultraList.add(node);
+		synchronized(workSync) {
+			workSync.notifyAll();
+		}
 	}
 	
 	public void addLeaf(String node) {
 		leafList.add(node);
+		synchronized(workSync) {
+			workSync.notifyAll();
+		}
 	}
 	
 	public String getWork() {
@@ -262,6 +285,21 @@ public class NIOServer implements Runnable {
 		else
 			return null;
 	}
+	
+	public void addNodeToWake(String node) {
+		wakeList.add(node);
+		synchronized(wakeSync) {
+			wakeSync.notifyAll();
+		}
+	}
+	
+	public String getNodeToWake() {
+		if (!wakeList.isEmpty())
+			return wakeList.remove(FRONT);
+		else
+			return null;
+	}
+	
 	public void sendToMaster(byte[] data){
 		send(masterSocketChannel, data);
 	}

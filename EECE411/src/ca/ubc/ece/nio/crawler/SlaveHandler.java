@@ -46,11 +46,15 @@ public class SlaveHandler implements DataHandler {
 		handle(failData, key);
 	}
 	
+	public boolean startRead(byte[] data) {
+		if (data.toString().equals("WAKEUP"))
+			return false;
+		return true;
+	}
+	
 	public void finishRead(SelectionKey key) throws IOException {
 		key.channel().close();
 	}
-	
-	
 	
 	public void finishWrite(SelectionKey key) {
 		// TODO don't think we need anything here
