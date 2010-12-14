@@ -23,7 +23,7 @@ public class NIOServer implements Runnable {
 	public static final String REQUEST = "GNUTELLA CONNECT/0.6\r\n" + "User-Agent: UBCECE (crawl)\r\n" + "Query-Routing: 0.2\r\n" + "X-Ultrapeer: False\r\n" + "Crawler: 0.1\r\n" + "\r\n";
 	private static final int BUFFER_SIZE = 8192;
 	private static final int FRONT = 0;
-	
+
 	// Run settings
 	private String hostName;
 	private int portNum;
@@ -45,13 +45,10 @@ public class NIOServer implements Runnable {
 	public NIOServer(String hostName, int portNum, DataHandler resultHandler, CrawlerNode owner) {
 		this.hostName = hostName;
 		this.portNum = portNum;
-		this.resultHandler = resultHandler;
-		this.ultraList = new Vector<String>();
-		this.leafList = new Vector<String>();
 		this.owner = owner;
-		dataBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-		pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
-		changeRequests = new Vector<ChangeRequest>();
+		this.resultHandler = resultHandler;
+		init();
+		
 		try {
 			selector = SelectorProvider.provider().openSelector();
 			serverChannel = ServerSocketChannel.open();
@@ -60,7 +57,14 @@ public class NIOServer implements Runnable {
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 			masterSocketChannel = createConnection(InetAddress.getLocalHost().getHostName(), 9090, 5);
 		} catch (IOException e) {}
-		
+	}
+	
+	private void init() {
+		this.ultraList = new Vector<String>();
+		this.leafList = new Vector<String>();
+		this.changeRequests = new Vector<ChangeRequest>();
+		this.dataBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
 	}
 	
 	public void run() {
@@ -154,11 +158,11 @@ public class NIOServer implements Runnable {
 		Attachment attachment = (Attachment) key.attachment();
 		
 		if (attachment.getAddress().equals(owner.getMasterAddress())) {
+			// TODO wake node
 			owner.start();
 			key.cancel();
 			return;
 		}
-			
 			
 		Status status = Status.CONNECTED;
 		try {
@@ -176,6 +180,7 @@ public class NIOServer implements Runnable {
 			status = Status.INTERNAL;
 			key.cancel();
 		}
+		
 		attachment.setStatus(status);
 		if (status != Status.CONNECTED) {
 			crawlerList.get(attachment.getIdentifier()).abort();
@@ -185,9 +190,7 @@ public class NIOServer implements Runnable {
 			resultHandler.handle(failData);
 			return;
 		}
-		
 		crawlerList.get(attachment.getIdentifier()).wake();
-		
 	}
 	
 	private void read(SelectionKey key) throws IOException {
@@ -254,24 +257,25 @@ public class NIOServer implements Runnable {
 		selector.wakeup();
 	}
 	
-	public void delegate() {
-		
-	}
-	
 	public void addUltrapeer(String node) {
 		ultraList.add(node);
 	}
 	
-	public void adLeaf(String node) {
+	public void addLeaf(String node) {
 		leafList.add(node);
 	}
 	
 	public void sendToMaster(byte[] data){
 		send(masterSocketChannel, data);
 	}
+	
+	public void reset() {
+		init();
+		for (Crawler crawler : crawlerList)
+			crawler.kill();
+	}
 
 	/* ************************************ EMBEDDED CLASSES ************************************ */
-	
 	private class ChangeRequest {
 		public static final int REGISTER = 1;
 		public static final int CHANGEOPS = 2;
@@ -292,14 +296,16 @@ public class NIOServer implements Runnable {
 		}
 		
 		public SocketChannel getSocketChannel() { return (channel); }
-		public int getType() { return (type); }
-		public int getOps() { return (ops); }
+		public int getType() { return type; }
+		public int getOps() { return ops; }
+		public int getId() { return id; }
 	}
 	
 	public class Crawler implements Runnable {
 		private String[] node;
 		private boolean abort = false;
-		SocketChannel socketChannel;
+		private boolean running = true;
+		private SocketChannel socketChannel;
 		private Object sync; //Used to determine which crawler needs to handle stuff
 		private int id;
 		
@@ -312,6 +318,10 @@ public class NIOServer implements Runnable {
 			this.abort = true;
 		}
 		
+		public void kill() {
+			this.running = false;
+		}
+		
 		public void wake() {
 			synchronized(sync) {
 				sync.notifyAll();
@@ -319,7 +329,7 @@ public class NIOServer implements Runnable {
 		}
 		
 		public void run(){
-			while(true){
+			while(running){
 				if(ultraList.size() > 0)
 					node = ultraList.remove(FRONT).split(":");
 				else if(leafList.size() > 0)

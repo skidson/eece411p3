@@ -3,6 +3,7 @@ package ca.ubc.ece.nio.crawler;
 import java.util.Iterator;
 
 // TODO Remove items from cache as size gets large
+// TODO make more better
 
 import java.util.Vector;
 
@@ -46,7 +47,7 @@ public class IPCache {
 		return false;
 	}
 	
-	public static byte[] toDomains(String address) {
+	private static byte[] toDomains(String address) {
 		String[] stringDomains = address.split("\\.");
 		byte[] domains = new byte[4];
 		

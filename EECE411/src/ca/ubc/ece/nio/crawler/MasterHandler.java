@@ -1,10 +1,14 @@
 package ca.ubc.ece.nio.crawler;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Vector;
 
 public class MasterHandler implements DataHandler {
 	// Constants
 	private static final int FRONT = 0;
+	private static final String OUTPUT_FILE = "results.txt";
 	
 	// Program variables
 	private Master owner;
@@ -34,10 +38,12 @@ public class MasterHandler implements DataHandler {
 		workerList.get(index).kill();
 	}
 	
+	public int getNumWorkers() {
+		return workerList.size();
+	}
+	
 	private Node parseData(byte[] data) {
-		// TODO this needs to be cleaned up
 		// Parsing will now only be done at master.
-		// Requirements:
 		// 1. Take in a byte[] data
 		// 2. Extract ultrapeers and leaves from data
 		// 3. Check each ultrapeer & leaf if cached
@@ -61,8 +67,6 @@ public class MasterHandler implements DataHandler {
 		Port = dataS.substring(startIndex+6, endIndex);
 		tempnode = new Node(Address, Integer.parseInt(Port));
 		
-		
-		
 		startIndex = dataS.indexOf("Peers: ");
 		if (!(startIndex == -1)) {
 			endIndex = dataS.indexOf("\n", startIndex);
@@ -78,7 +82,6 @@ public class MasterHandler implements DataHandler {
 						portNum = Integer.parseInt(readArray[1]);
 						addressPort = readArray[1] + ":" + portNum;
 						owner.addUltrapeer(addressPort);
-						
 					}
 				}	
 			} 
@@ -99,8 +102,6 @@ public class MasterHandler implements DataHandler {
 							readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 							int portNum2 = Integer.parseInt(readArray[1]);
 							addressPort = readArray[1] + ":" + portNum2;
-							
-							
 							owner.addLeaf(addressPort);
 						}
 					}
@@ -115,6 +116,11 @@ public class MasterHandler implements DataHandler {
 		boolean running = true;
 		
 		public void run() {
+			try {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(OUTPUT_FILE));
+			} catch (IOException e1) {
+				System.err.println("Could not access '" + OUTPUT_FILE + "'");
+			}
 			while(running) {
 				if (dataList.isEmpty()) {
 					try {
@@ -123,7 +129,7 @@ public class MasterHandler implements DataHandler {
 				}
 				Node node = parseData(dataList.remove(FRONT));
 				owner.addNode(node);
-//				owner.ipCache.cache(node.getAddress());
+				owner.ipCache.cache(node.getAddress());
 			}
 		}
 		
