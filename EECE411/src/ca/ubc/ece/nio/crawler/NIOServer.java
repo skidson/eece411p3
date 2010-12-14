@@ -203,7 +203,7 @@ public class NIOServer implements Runnable {
 		}
 		Attachment attachment = (Attachment) key.attachment();
 		byte[] data = addTag(attachment, (dataBuffer.toString().getBytes()));
-		resultHandler.handle(data);
+		resultHandler.handle(data, key);
 		resultHandler.finishRead(key);
 		
 		crawlerList.get(attachment.getIdentifier()).wake(); // potential abort problems here
@@ -256,9 +256,9 @@ public class NIOServer implements Runnable {
 	
 	public String getWork() {
 		if (!ultraList.isEmpty())
-			return ultraList.remove(FRONT);
+			return (ultraList.remove(FRONT) + ";U");
 		else if (!leafList.isEmpty())
-			return leafList.remove(FRONT);
+			return (leafList.remove(FRONT) + ";L");
 		else
 			return null;
 	}

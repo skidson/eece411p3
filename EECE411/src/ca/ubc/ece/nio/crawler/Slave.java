@@ -132,6 +132,14 @@ public class Slave implements Runnable, CrawlerNode {
 		server.sendToMaster(data);
 	}
 	
+	public void newWork(byte[] data){
+		String[] node = new String(data).split(";");
+		if(node[1].equals("U"))
+			ultraList.add(node);
+		else
+			leafList.add(node);
+	}
+	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	public class MasterListener implements Runnable {
 		ServerSocket listenerServer;

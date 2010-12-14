@@ -2,6 +2,7 @@ package ca.ubc.ece.nio.crawler;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.channels.SocketChannel;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -131,6 +132,14 @@ public class Master implements Runnable, CrawlerNode {
 	
 	public void addNode(Node node) {
 		nodeList.add(node);
+	}
+	
+	public String getWork(){
+		return(server.getWork());
+	}
+	
+	public void sendWork(String work, SocketChannel sc){
+		server.send(sc, work.getBytes());
 	}
 	
 	public boolean wakeNode(int index) {
