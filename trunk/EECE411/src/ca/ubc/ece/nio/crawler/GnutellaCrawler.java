@@ -43,7 +43,9 @@ public class GnutellaCrawler implements Crawler {
 				node = address.split(":");
 			} else {
 				try {
-					server.workSync.wait();
+					synchronized(server.workSync){
+						server.workSync.wait();
+					}	
 				} catch (InterruptedException e) {}
 				continue;
 			}
