@@ -163,5 +163,9 @@ public class Master implements Runnable, CrawlerNode {
 		}
 	}
 	
+	public void backup(Vector<Node> nodelist) {
+		// TODO send list to master
+	}
+	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 }
