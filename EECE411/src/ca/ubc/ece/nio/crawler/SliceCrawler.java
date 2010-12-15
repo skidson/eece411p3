@@ -40,8 +40,11 @@ public class SliceCrawler implements Crawler {
 			String address = server.getNodeToWake();
 			if (address == null) {
 				try {
-					server.wakeSync.wait();
-				} catch (InterruptedException e) {}
+					synchronized(server.wakeSync){
+						server.wakeSync.wait();
+					}
+					
+					} catch (InterruptedException e) {}
 				continue;
 			}
 			

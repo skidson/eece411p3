@@ -64,6 +64,7 @@ public class NIOServer implements Runnable {
 	private void init() {
 		this.ultraList = new Vector<String>();
 		this.leafList = new Vector<String>();
+		this.crawlerList = new Vector<Crawler>();
 		this.changeRequests = new Vector<ChangeRequest>();
 		this.dataBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
