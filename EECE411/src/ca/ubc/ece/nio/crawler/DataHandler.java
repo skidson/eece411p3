@@ -9,7 +9,6 @@ public interface DataHandler {
 	public void spawnWorker();
 	public int getNumWorkers();
 	
-	public boolean startRead(byte[] data);
 	public void finishRead(SelectionKey key) throws IOException;
 	public void finishWrite(SelectionKey key) throws IOException;
 	public void connectFailed(SelectionKey key);

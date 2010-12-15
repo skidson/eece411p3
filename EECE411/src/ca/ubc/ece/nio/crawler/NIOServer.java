@@ -34,8 +34,6 @@ public class NIOServer implements Runnable {
 	private SocketChannel masterSocketChannel;
 	private Map<SocketChannel, List<ByteBuffer>> pendingData;
 	private List<ChangeRequest> changeRequests;
-	private Vector<String> ultraList, leafList, wakeList;
-	public Object workSync, wakeSync;
 	private DataHandler resultHandler;
 	private Vector<Crawler> crawlerList;
 	private CrawlerNode owner;
@@ -47,8 +45,6 @@ public class NIOServer implements Runnable {
 		this.portNum = portNum;
 		this.owner = owner;
 		this.resultHandler = resultHandler;
-		this.workSync = new Object();
-		this.wakeSync = new Object();
 		init();
 		
 		try {
@@ -62,8 +58,6 @@ public class NIOServer implements Runnable {
 	}
 	
 	private void init() {
-		this.ultraList = new Vector<String>();
-		this.leafList = new Vector<String>();
 		this.crawlerList = new Vector<Crawler>();
 		this.changeRequests = new Vector<ChangeRequest>();
 		this.dataBuffer = ByteBuffer.allocate(BUFFER_SIZE);
@@ -214,14 +208,12 @@ public class NIOServer implements Runnable {
 			return;
 		}
 		
-		if(!resultHandler.startRead(dataBuffer.array())) {
-			owner.wake();
-			return;
-		}
-		
 		Attachment attachment = (Attachment) key.attachment();
 		byte[] data = addTag(attachment, (dataBuffer.array()));
-		resultHandler.handle(data, key);
+		byte[] dataCopy = new byte[data.length];
+		System.arraycopy(data, 0, dataCopy, 0, data.length);
+		
+		resultHandler.handle(dataCopy, key);
 		resultHandler.finishRead(key);
 		
 		crawlerList.get(attachment.getIdentifier()).wake(); // potential abort problems here
@@ -262,43 +254,6 @@ public class NIOServer implements Runnable {
 			queue.add(ByteBuffer.wrap(data));
 		}
 		selector.wakeup();
-	}
-	
-	public void addUltrapeer(String node) {
-		ultraList.add(node);
-		synchronized(workSync) {
-			workSync.notifyAll();
-		}
-	}
-	
-	public void addLeaf(String node) {
-		leafList.add(node);
-		synchronized(workSync) {
-			workSync.notifyAll();
-		}
-	}
-	
-	public String getWork() {
-		if (!ultraList.isEmpty())
-			return (ultraList.remove(FRONT) + ";U");
-		else if (!leafList.isEmpty())
-			return (leafList.remove(FRONT) + ";L");
-		else
-			return null;
-	}
-	
-	public void addNodeToWake(String node) {
-		wakeList.add(node);
-		synchronized(wakeSync) {
-			wakeSync.notifyAll();
-		}
-	}
-	
-	public String getNodeToWake() {
-		if (!wakeList.isEmpty())
-			return wakeList.remove(FRONT);
-		else
-			return null;
 	}
 	
 	public void sendToMaster(byte[] data){
