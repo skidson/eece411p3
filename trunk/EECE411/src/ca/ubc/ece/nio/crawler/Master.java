@@ -28,7 +28,6 @@ public class Master implements Runnable, CrawlerNode {
 	private MasterHandler handler;
 	public IPCache ipCache;
 	private String masterAddress;
-	private Vector<String> wakeList;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	
@@ -42,7 +41,6 @@ public class Master implements Runnable, CrawlerNode {
 		this.handler = new MasterHandler(this);
 		this.server = new NIOServer(hostName, portNum, handler, this);
 		this.nodeList = new Vector<Node>();
-		this.wakeList = new Vector<String>();
 		this.ipCache = new IPCache();
 		this.controller = new NodeController(NODE_LIST);
 	}
@@ -97,7 +95,7 @@ public class Master implements Runnable, CrawlerNode {
 	public void run() {
 		new Thread(server).start();
 		for (int i = 0; i < NUM_CRAWLERS; i++)
-			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), server));
+			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), handler, server));
 		
 		while(true) {
 			// TODO provide commandline interface
@@ -106,7 +104,7 @@ public class Master implements Runnable, CrawlerNode {
 			String command = in.nextLine();
 			
 			if(command.equals("print")) {
-				
+				print();
 			} else if (command.equals("quit")) {
 				// TODO tell all nodes to stop
 				System.exit(0);
@@ -125,23 +123,19 @@ public class Master implements Runnable, CrawlerNode {
 	}
 	
 	public void print() {
-		
+		// TODO
 	}
 	
-	public void addUltrapeer(String node) {
-		server.addUltrapeer(node);
+	public void reset() {
+		// TODO
 	}
 	
-	public void addLeaf(String node) {
-		server.addUltrapeer(node);
+	public void kill() {
+		// TODO
 	}
 	
 	public void addNode(Node node) {
 		nodeList.add(node);
-	}
-	
-	public String getWork(){
-		return(server.getWork());
 	}
 	
 	public void sendWork(String work, SocketChannel sc){
@@ -157,7 +151,8 @@ public class Master implements Runnable, CrawlerNode {
 		return masterAddress;
 	}
 	
-	public void wake() {
+	public void wake(byte[] data) {
+		// TODO wakeup and act as backup
 		synchronized(server) {
 			server.notifyAll();
 		}
@@ -165,6 +160,10 @@ public class Master implements Runnable, CrawlerNode {
 	
 	public void backup(Vector<Node> nodelist) {
 		// TODO send list to master
+	}
+
+	public int getPortNum() {
+		return portNum;
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */

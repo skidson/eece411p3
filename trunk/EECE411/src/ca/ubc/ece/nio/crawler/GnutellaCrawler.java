@@ -15,8 +15,9 @@ public class GnutellaCrawler implements Crawler {
 	private Object sync; //Used to determine which crawler needs to handle stuff
 	private int id;
 	private NIOServer server;
+	private SlaveHandler handler;
 
-	public GnutellaCrawler(int id, NIOServer server){
+	public GnutellaCrawler(int id, SlaveHandler handler, NIOServer server){
 		this.sync = new Object();
 		this.id = id;
 		this.server = server;
@@ -38,13 +39,14 @@ public class GnutellaCrawler implements Crawler {
 
 	public void run(){
 		while(running){
-			String address = server.getWork();
+			String address = handler.getWork();
 			if (address != null) {
 				node = address.split(":");
 			} else {
 				try {
-					synchronized(server.workSync){
-						server.workSync.wait();
+					handler.workSync.wait();
+					synchronized(handler.workSync){
+						handler.workSync.wait();
 					}	
 				} catch (InterruptedException e) {}
 				continue;

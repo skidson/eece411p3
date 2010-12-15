@@ -15,6 +15,7 @@ public class NodeController {
 	
 	// Program variables
 	private Vector<WorkerNode> nodes;
+	private Vector<WorkerNode> activeNodes;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public NodeController(String[] nodes) {
@@ -62,8 +63,25 @@ public class NodeController {
 		return nodes.size();
 	}
 	
+	public int getNumWorking() {
+		int count = 0;
+		for (WorkerNode node : nodes) {
+			if (node.getWorking())
+				count++;
+		}
+		return count;
+	}
+	
+	public void setWorking(int index, boolean working) {
+		nodes.get(index).setWorking(working);
+	}
+	
 	public String getAddress(int index) {
 		return nodes.get(index).getAddress();
+	}
+	
+	public boolean isWorking(int index) {
+		return nodes.get(index).getWorking();
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
@@ -85,13 +103,14 @@ public class NodeController {
 			this.lastAccess = time;
 		}
 		
-		public void setWorking(boolean working) {
+		protected void setWorking(boolean working) {
 			this.working = working;
 		}
 		
 		public String getAddress() { return this.address; }
 		public long getLastAccess() { return this.lastAccess; }
 		public boolean isAlive() { return this.alive; }
+		public boolean getWorking() { return(this.working); }
 	}
 	
 	// TODO need to store time last accessed for each node and check up regularly

@@ -12,12 +12,17 @@ public class SlaveHandler implements DataHandler {
 	private Slave owner;
 	private Vector<byte[]> dataList;
 	private Vector<Relayer> workerList;
+	private Vector<String> ultraList, leafList;
+	public Object workSync;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public SlaveHandler(Slave owner) {
 		this.owner = owner;
 		this.dataList = new Vector<byte[]>();
 		this.workerList = new Vector<Relayer>();
+		this.ultraList = new Vector<String>();
+		this.leafList = new Vector<String>();
+		this.workSync = new Object();
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
@@ -26,11 +31,20 @@ public class SlaveHandler implements DataHandler {
 		// Can call public Slave functions
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
+		if (data.toString().contains("WAKEUP")) {
+			owner.wake(data);
+			return;
+		}
+		
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 
 		if(socketChannel.socket().getInetAddress().equals(owner.getMasterAddress())){
-			owner.newWork(data);
-		}else {
+			String[] node = new String(data).split(";");
+			if(node[1].equals("U"))
+				addUltrapeer(node[0]);
+			else
+				addLeaf(node[0]);
+		} else {
 			synchronized(dataList) {
 				dataList.add(data);
 				dataList.notifyAll();
@@ -44,12 +58,6 @@ public class SlaveHandler implements DataHandler {
 				"\r\nPort: " + attachment.getPort() + 
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
 		handle(failData, key);
-	}
-	
-	public boolean startRead(byte[] data) {
-		if (data.toString().equals("WAKEUP"))
-			return false;
-		return true;
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {
@@ -73,6 +81,29 @@ public class SlaveHandler implements DataHandler {
 	
 	public int getNumWorkers() {
 		return workerList.size();
+	}
+	
+	public void addUltrapeer(String node) {
+		ultraList.add(node);
+		synchronized(workSync) {
+			workSync.notifyAll();
+		}
+	}
+	
+	public void addLeaf(String node) {
+		leafList.add(node);
+		synchronized(workSync) {
+			workSync.notifyAll();
+		}
+	}
+	
+	public String getWork() {
+		if (!ultraList.isEmpty())
+			return (ultraList.remove(FRONT) + ";U");
+		else if (!leafList.isEmpty())
+			return (leafList.remove(FRONT) + ";L");
+		else
+			return null;
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */

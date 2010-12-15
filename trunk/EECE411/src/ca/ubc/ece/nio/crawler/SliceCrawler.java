@@ -13,11 +13,13 @@ public class SliceCrawler implements Crawler {
 	private SocketChannel socketChannel;
 	private Object sync; //Used to determine which crawler needs to handle stuff
 	private int id;
+	private MasterHandler handler;
 	private NIOServer server;
 
-	public SliceCrawler(int id, NIOServer server){
+	public SliceCrawler(int id, MasterHandler handler, NIOServer server){
 		this.sync = new Object();
 		this.id = id;
+		this.handler = handler;
 		this.server = server;
 	}
 
@@ -37,16 +39,7 @@ public class SliceCrawler implements Crawler {
 
 	public void run(){
 		while(running){
-			String address = server.getNodeToWake();
-			if (address == null) {
-				try {
-					synchronized(server.wakeSync){
-						server.wakeSync.wait();
-					}
-					
-					} catch (InterruptedException e) {}
-				continue;
-			}
+			String address = handler.getWork();
 			
 			try {
 				socketChannel = server.createConnection(address, server.getPort(), id);

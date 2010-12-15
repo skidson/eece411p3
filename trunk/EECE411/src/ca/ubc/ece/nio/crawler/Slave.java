@@ -82,13 +82,14 @@ public class Slave implements Runnable, CrawlerNode {
 	}
 	
 	public void run() {
-		//idle(); // Idle until connection from master
 		while(running) {
+			idle(); // Idle until connection from master
 			new Thread(server).start();
 			for (int i = 0; i < NUM_CRAWLERS; i++)
-				server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), server));
+				server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), handler, server));
+			idle();
 		}
-		reset(); // clear this run's data
+		reset();
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
@@ -108,21 +109,26 @@ public class Slave implements Runnable, CrawlerNode {
 	
 	public void idle() {
 		try {
-			synchronized(server){
+			synchronized(server) {
 				server.wait();
 			}
 		} catch (InterruptedException e) {}
 	}
 	
-	public void wake() {
-		synchronized(server) {
-			server.notifyAll();
+	public void wake(byte[] data) {
+		if (!running) {
+			synchronized(server) {
+				server.notifyAll();
+			}
 		}
 	}
 	
 	public void kill() {
 		// Kill this node, restart requires bash script or manual configuraton
 		running = false;
+		synchronized(server) { 
+			server.notifyAll();
+		}
 		System.exit(0);
 	}
 	
@@ -134,40 +140,6 @@ public class Slave implements Runnable, CrawlerNode {
 		server.sendToMaster(data);
 	}
 	
-	public void addUltrapeer(String node) {
-		server.addUltrapeer(node);
-	}
-	
-	public void addLeaf(String node) {
-		server.addLeaf(node);
-	}
-	
-	public void newWork(byte[] data){
-		String[] node = new String(data).split(";");
-		if(node[1].equals("U"))
-			addUltrapeer(node[0]);
-		else
-			addLeaf(node[0]);
-	}
-	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
-	public class MasterListener implements Runnable {
-		ServerSocket listenerServer;
-		
-		public MasterListener(int portNum) {
-			try {
-				listenerServer = new ServerSocket(portNum);
-			} catch (IOException e) {}
-		}
-		
-		public void run() {
-			while(true) {
-				try {
-					Socket socket = listenerServer.accept();
-					// TODO can design custom Action class for use here to allow remote control
-					wake(); // Break from idle() loop
-				} catch (IOException e) {}
-			}
-		}
-	}
+	
 }

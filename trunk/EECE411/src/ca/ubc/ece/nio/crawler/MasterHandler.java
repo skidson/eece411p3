@@ -15,53 +15,98 @@ public class MasterHandler implements DataHandler {
 	// Program variables
 	private Master owner;
 	private Vector<byte[]> dataList;
-	private Vector<Logger> workerList;
+	private Vector<Logger> loggerList;
+	private Vector<String> ultraList, leafList, workingList, wakeList;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public MasterHandler(Master owner) {
 		this.owner = owner;
-		dataList = new Vector<byte[]>();
-		workerList = new Vector<Logger>();
+		this.dataList = new Vector<byte[]>();
+		this.ultraList = new Vector<String>();
+		this.leafList = new Vector<String>();
+		this.wakeList = new Vector<String>();
+		this.workingList = new Vector<String>();
+		this.loggerList = new Vector<Logger>();
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
 	public void handle(byte[] data, SelectionKey Key) {
+		if (data.toString().contains("WAKEUP")) {
+			owner.wake(data);
+			return;
+		} else if (data.toString().contains("DIE")){
+			owner.reset();
+		}
+		
 		synchronized(dataList){
 			dataList.add(data);
 			dataList.notifyAll();
 		}
 	}
 	
+	// TODO make a diagnosticCrawler that crawls nodes that should be awake, if dead, add another to wakelist
 	public void connectFailed(SelectionKey key) {
 		// TODO unable to contact node, wake another
 	}
 	
-	public boolean startRead(byte[] data) {
-		return true;
-	}
-	
 	public void finishRead(SelectionKey key) throws IOException {	
 		SocketChannel socketChannel = (SocketChannel)key.channel();
-		owner.sendWork(owner.getWork(), socketChannel);
+		if (!ultraList.isEmpty())
+			owner.sendWork(ultraList.remove(FRONT) + ";U", socketChannel);
+		else if (!leafList.isEmpty())
+			owner.sendWork(leafList.remove(FRONT) + ";L", socketChannel);
 	}
 	
 	public void finishWrite(SelectionKey key) throws IOException {
-		
+		// TODO close channel
 	}
 	
 	/* Workers may be spawned or killed based on free memory */
 	public void spawnWorker() {
 		Logger logger = new Logger();
-		workerList.add(logger);
+		loggerList.add(logger);
 		new Thread(logger).start();
 	}
 	
+	public void addCrawler(Crawler crawler) {
+		
+	}
+	
 	public void killWorker(int index) {
-		workerList.get(index).kill();
+		loggerList.get(index).kill();
 	}
 	
 	public int getNumWorkers() {
-		return workerList.size();
+		return loggerList.size();
+	}
+	
+	private void addUltrapeer(String node) {
+		ultraList.add(node);
+		synchronized(ultraList) {
+			ultraList.notifyAll();
+		}
+	}
+	
+	private void addLeaf(String node) {
+		leafList.add(node);
+		synchronized(leafList) {
+			leafList.notifyAll();
+		}
+	}
+	
+	public void addNodeToWake(String node) {
+		wakeList.add(node);
+	}
+	
+	public String getWork() {
+		if (!wakeList.isEmpty())
+			return wakeList.remove(FRONT);
+		else {
+			// If no nodes to wake, check up on already working node
+			String worker = workingList.remove(FRONT);
+			workingList.add(worker);
+			return(worker);
+		}
 	}
 	
 	private Node parseData(byte[] data) {
@@ -70,7 +115,7 @@ public class MasterHandler implements DataHandler {
 		// 2. Extract ultrapeers and leaves from data
 		// 3. Check each ultrapeer & leaf if cached
 		//		- if not cached, add to ultraList or leafList in the form hostName:portNum (as a string)
-		// 4. Construct Node object from data[]
+		// 4. Construct Node object from data[] 
 		// 5. Return the constructed Node object
 		Node tempnode = null;
 		String[] tempArray, tempArray2, readArray;
@@ -103,7 +148,7 @@ public class MasterHandler implements DataHandler {
 						readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 						portNum = Integer.parseInt(readArray[1]);
 						addressPort = readArray[1] + ":" + portNum;
-						owner.addUltrapeer(addressPort);
+						addUltrapeer(addressPort);
 					}
 				}	
 			} 
@@ -124,7 +169,7 @@ public class MasterHandler implements DataHandler {
 							readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 							int portNum2 = Integer.parseInt(readArray[1]);
 							addressPort = readArray[1] + ":" + portNum2;
-							owner.addLeaf(addressPort);
+							addLeaf(addressPort);
 						}
 					}
 				}
