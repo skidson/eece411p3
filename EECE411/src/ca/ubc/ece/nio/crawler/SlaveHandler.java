@@ -131,14 +131,13 @@ public class SlaveHandler implements DataHandler {
 		//TODO CAN BE BUFFERED SOME HOW; Update: David 12:05 OMG THIS Maight Naught Werk @_@ and Asplode!	
 			  //Essentially, hold 10 nodes, each seperated by a ;, send them then clear for next nodes.
 			 
-			toBeSent = (toBeSent.toString() + dataList.remove(FRONT).toString() + ";" + "\r\n").getBytes();
-			if (count == 9) {
-				count = 0;
+			toBeSent = (new String(toBeSent) + new String(dataList.remove(FRONT)) + ";" + "\r\n").getBytes();
+			count++;
+			if (count == 10) {
 				owner.sendToMaster(toBeSent);
 				Arrays.fill(toBeSent,(byte)0);
-			} else { 
-				count++;
-			}
+				count = 0;
+			} 
 		}
 
 		
