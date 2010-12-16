@@ -3,6 +3,7 @@ package ca.ubc.ece.nio.crawler;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Vector;
 
 public class SlaveHandler implements DataHandler {
@@ -114,8 +115,8 @@ public class SlaveHandler implements DataHandler {
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	private class Relayer implements Runnable {
 		boolean running = true;
-//		int count = 0;
-		byte[] toBeSent = new byte[8192];
+		int count = 0; 
+		byte[] toBeSent = new byte[8192]; //watch for index out of bounds
 		
 		public void run() {
 			while(running) {
@@ -127,10 +128,17 @@ public class SlaveHandler implements DataHandler {
 					} catch (InterruptedException e) { continue; }
 				}
 			}
-		//TODO CAN BE BUFFERED SOME HOW 	
-			toBeSent = (toBeSent.toString() + dataList.remove(FRONT).toString() + "\r\n").getBytes();
-
-			owner.sendToMaster(toBeSent);
+		//TODO CAN BE BUFFERED SOME HOW; Update: David 12:05 OMG THIS Maight Naught Werk @_@ and Asplode!	
+			  //Essentially, hold 10 nodes, each seperated by a ;, send them then clear for next nodes.
+			 
+			toBeSent = (toBeSent.toString() + dataList.remove(FRONT).toString() + ";" + "\r\n").getBytes();
+			if (count == 9) {
+				count = 0;
+				owner.sendToMaster(toBeSent);
+				Arrays.fill(toBeSent,(byte)0);
+			} else { 
+				count++;
+			}
 		}
 
 		

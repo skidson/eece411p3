@@ -57,6 +57,17 @@ public class IPCache {
 		return false;
 	}
 	
+	public void ipCacheSizeCheck() {
+		// TODO Remove items from cache as size gets large
+		// Let large = 25 currently
+		int indexMax = this.cache.capacity();
+		int cacheMax = 25;
+		if (this.cache.capacity() >= cacheMax) {
+			this.cache.subList(0, indexMax - cacheMax).clear();	
+		}
+	}
+
+	
 	public Iterator<IPAddress> iterator() {
 		return(cache.iterator());
 	}
