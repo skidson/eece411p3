@@ -49,6 +49,7 @@ public class GnutellaCrawler implements Crawler {
 			} else {
 				try {
 					synchronized(handler.workSync){
+						System.out.println("GnutellaCralwer " + id + "waiting for work!");
 						handler.workSync.wait();
 					}
 				} catch (InterruptedException e) {}

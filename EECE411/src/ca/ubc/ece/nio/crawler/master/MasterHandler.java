@@ -33,10 +33,10 @@ public class MasterHandler implements DataHandler {
 	
 	/* ************************************ HELPER METHODS ************************************ */
 	public void handle(byte[] data, SelectionKey Key) {
-		if (data.toString().contains(SliceCrawler.WAKE_REQUEST)) {
+		if (new String(data).contains(SliceCrawler.WAKE_REQUEST)) {
 			owner.wake(data);
 			return;
-		} else if (data.toString().contains(SliceCrawler.KILL_REQUEST)){
+		} else if (new String(data).contains(SliceCrawler.KILL_REQUEST)){
 			owner.reset();
 		}
 		
@@ -52,9 +52,10 @@ public class MasterHandler implements DataHandler {
 	
 	public void finishRead(SelectionKey key) throws IOException {	
 		SocketChannel socketChannel = (SocketChannel)key.channel();
-		if (!ultraList.isEmpty())
+		if (!ultraList.isEmpty()){
+			System.out.println("Sending ultrapeer!");
 			owner.sendWork(ultraList.remove(FRONT) + ";U", socketChannel);
-		else if (!leafList.isEmpty())
+		}else if (!leafList.isEmpty())
 			owner.sendWork(leafList.remove(FRONT) + ";L", socketChannel);
 		key.cancel();
 	}

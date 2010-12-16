@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.logging.Handler;
 
 public class NIOServer implements Runnable {
 	// Constants
@@ -45,6 +46,8 @@ public class NIOServer implements Runnable {
 		this.portNum = portNum;
 		this.owner = owner;
 		this.resultHandler = resultHandler;
+		//TODO LOL FIX PL0X
+		this.pendingData = new Map<SocketChannel, List<ByteBuffer>>();
 		init();
 		
 		try {
@@ -252,10 +255,12 @@ public class NIOServer implements Runnable {
 			// If no more to write, switch channel back to read
 			if(queue.isEmpty())
 				key.interestOps(SelectionKey.OP_READ);
+			resultHandler.finishWrite(key);
 		}
 	}
 	
 	public void send(SocketChannel socket, byte[] data) {
+		System.out.println("Attempting to write!");
 		changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
 		
 		synchronized(pendingData) {
