@@ -71,8 +71,8 @@ public class MasterHandler implements DataHandler {
 		new Thread(logger).start();
 	}
 	
-	public void killWorker(int index) {
-		loggerList.get(index).kill();
+	public void killWorker() {
+		loggerList.get(FRONT).kill();
 	}
 	
 	public int getNumWorkers() {

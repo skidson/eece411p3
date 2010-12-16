@@ -80,8 +80,8 @@ public class SlaveHandler implements DataHandler {
 	}
 	
 	/* Workers may be spawned or killed based on free memory */
-	public void killWorker(int index) {
-		workerList.get(index).kill();
+	public void killWorker() {
+		workerList.get(FRONT).kill();
 	}
 	
 	public void spawnWorker() {

@@ -167,7 +167,7 @@ public class Master implements Runnable, Node {
 		} catch (InterruptedException e) {}
 		int workerCount = handler.getNumWorkers();
 		for(int i = 0; i < workerCount; i++)
-			handler.killWorker(0);
+			handler.killWorker();
 		this.handler = new MasterHandler(this);
 		run();
 	}
