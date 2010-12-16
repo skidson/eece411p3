@@ -90,7 +90,7 @@ public class Slave implements Runnable, CrawlerNode {
 		new Thread(server).start();
 		idle();
 		for (int i = 0; i < NUM_CRAWLERS; i++)
-			server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), handler, server));
+			server.addCrawler(new ExternalCrawler(server.getNumCrawlers(), handler, server));
 		handler.spawnWorker();
 		reset();
 	}

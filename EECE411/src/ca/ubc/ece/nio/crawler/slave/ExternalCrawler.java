@@ -6,7 +6,7 @@ import java.nio.channels.SocketChannel;
 import ca.ubc.ece.nio.crawler.Crawler;
 import ca.ubc.ece.nio.crawler.NIOServer;
 
-public class GnutellaCrawler implements Crawler {
+public class ExternalCrawler implements Crawler {
 	// Constants
 	public static final String REQUEST = "GNUTELLA CONNECT/0.6\r\n" + "User-Agent: UBCECE (crawl)\r\n" + "Query-Routing: 0.2\r\n" + "X-Ultrapeer: False\r\n" + "Crawler: 0.1\r\n" + "\r\n";
 	public static final int FRONT = 0;
@@ -20,7 +20,7 @@ public class GnutellaCrawler implements Crawler {
 	private NIOServer server;
 	private SlaveHandler handler;
 
-	public GnutellaCrawler(int id, SlaveHandler handler, NIOServer server){
+	public ExternalCrawler(int id, SlaveHandler handler, NIOServer server){
 		this.sync = new Object();
 		this.id = id;
 		this.server = server;

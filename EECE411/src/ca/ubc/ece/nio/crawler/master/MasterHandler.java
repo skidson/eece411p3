@@ -33,10 +33,10 @@ public class MasterHandler implements DataHandler {
 	
 	/* ************************************ HELPER METHODS ************************************ */
 	public void handle(byte[] data, SelectionKey Key) {
-		if (new String(data).contains(SliceCrawler.WAKE_REQUEST)) {
+		if (new String(data).contains(InternalCrawler.WAKE_REQUEST)) {
 			owner.wake(data);
 			return;
-		} else if (new String(data).contains(SliceCrawler.KILL_REQUEST)){
+		} else if (new String(data).contains(InternalCrawler.KILL_REQUEST)){
 			owner.reset();
 		}
 		
