@@ -196,7 +196,7 @@ public class NIOServer implements Runnable {
 			crawlerList.get(attachment.getIdentifier()).abort();
 			resultHandler.connectFailed(key);
 		}
-		System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
+		System.out.println("Crawler " + attachment.getIdentifier() + " waking up...");
 		crawlerList.get(attachment.getIdentifier()).wake();
 	}
 	
