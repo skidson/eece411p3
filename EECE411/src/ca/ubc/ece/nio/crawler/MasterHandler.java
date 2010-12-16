@@ -12,7 +12,7 @@ public class MasterHandler implements DataHandler {
 	private static final int FRONT = 0;
 	private static final String OUTPUT_FILE = "results.txt";
 	
-	// Program variableslol
+	// Program variables
 	private Master owner;
 	private Vector<byte[]> dataList;
 	private Vector<Logger> loggerList;
@@ -199,6 +199,7 @@ public class MasterHandler implements DataHandler {
 				}
 				Node node = parseData(dataList.remove(FRONT));
 				owner.addNode(node);
+				owner.ipCache.ipCacheSizeCheck(); 
 				owner.ipCache.cache(node.getAddress());
 			}
 		}
