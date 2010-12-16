@@ -137,6 +137,10 @@ public class Slave implements Runnable, CrawlerNode {
 		server.sendToMaster(data);
 	}
 	
+	public int getTimeout() {
+		return timeout;
+	}
+	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	
 }

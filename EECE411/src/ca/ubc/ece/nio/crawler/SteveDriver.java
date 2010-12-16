@@ -1,20 +1,13 @@
 package ca.ubc.ece.nio.crawler;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
 public class SteveDriver {
 
 	public static void main(String[] args) {
-		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter("lolol.txt"));
-			bw.write("ur mom");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+		IPCache cache = new IPCache();
+		cache.cache("nis-planet1.doshisha.ac.jp");
+		cache.cache("planck227ple.test.ibbt.be");
+		cache.cache("aladdin.planetlab.extranet.uni-passau.de");
+		System.out.println(cache.toString());
 	}
 
 }

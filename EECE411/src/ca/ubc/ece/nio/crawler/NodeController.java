@@ -35,7 +35,6 @@ public class NodeController {
 				if (newLine != null) {
 					WorkerNode worker = new WorkerNode(newLine);
 					this.nodes.add(worker);
-					System.out.println(worker.getAddress());
 				}
 			}
 		} catch (FileNotFoundException e) {
@@ -84,11 +83,21 @@ public class NodeController {
 		return nodes.get(index).getWorking();
 	}
 	
-	public Vector<String> getWorkers(int num) {
+	public Vector<String> selectWorkers(int num) {
 		Vector<String> workers = new Vector<String>();
-		for (int i = 0; i < num; i++)
-			workers.add(nodes.get((i + workerCount)/nodes.size()).getAddress());
+		for (int i = 0; i < num; i++) {
+			workers.add(nodes.get((i + workerCount)%nodes.size()).getAddress());
+			System.out.println(i + ".  SELECTING " + nodes.get((i + workerCount)%nodes.size()).getAddress());
+		}
+		workerCount += num;
 		return workers;
+	}
+	
+	public String selectWorker() {
+		String worker = nodes.get(workerCount).getAddress();
+		System.out.println("SELECTING " + nodes.get((workerCount)%nodes.size()).getAddress());
+		workerCount++;
+		return worker;
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */

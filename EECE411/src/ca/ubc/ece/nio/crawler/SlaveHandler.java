@@ -124,13 +124,10 @@ public class SlaveHandler implements DataHandler {
 			}
 		//TODO CAN BE BUFFERED SOME HOW 	
 			toBeSent = (toBeSent.toString() + dataList.remove(FRONT).toString() + "\r\n").getBytes();
-//			count++;
-			
-//			if (count>10){
-				owner.sendToMaster(toBeSent);
-//				count = 0;
-//			}
+
+			owner.sendToMaster(toBeSent);
 		}
+
 		
 		public void kill() {
 			this.running = false;

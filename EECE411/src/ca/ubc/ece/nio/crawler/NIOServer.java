@@ -52,8 +52,16 @@ public class NIOServer implements Runnable {
 			serverChannel = ServerSocketChannel.open();
 			serverChannel.configureBlocking(false);
 			serverChannel.socket().bind(new InetSocketAddress(hostName, portNum));
+			serverChannel.socket().setSoTimeout(owner.getTimeout());
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			masterSocketChannel = createConnection(InetAddress.getLocalHost().getHostName(), 9090, 5);
+//			try {
+//				masterSocketChannel = createConnection(owner.getMasterAddress(), portNum, -1);
+//			} catch (IOException e) {
+//				 If this fails, resort to backup
+//				try {
+//					masterSocketChannel = createConnection(backup, portNum, 5);
+//				} catch (IOException e1) { /* your fucked */ }
+//			} 
 		} catch (IOException e) {}
 	}
 	
@@ -82,6 +90,7 @@ public class NIOServer implements Runnable {
 							break;
 						}
 					}
+					this.changeRequests.clear();
 				}
 				
 				// Blocks until an event arrives at a channel
@@ -162,10 +171,12 @@ public class NIOServer implements Runnable {
 	
 	private void connect(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
+		System.out.println("SliceCrawler " + ((Attachment)key.attachment()).getIdentifier() + " connecting..."); // debug
 		Status status = Status.CONNECTED;
 		try {
 			socketChannel.finishConnect();
 			updateAttachment(key);
+			System.out.println("SliceCrawler " + ((Attachment)key.attachment()).getIdentifier() + " successfully connected to " + ((Attachment)key.attachment()).getAddress()); // debug
 		} catch (SocketTimeoutException e) {
 			status = Status.TIMEOUT;
 		} catch (UnknownHostException e) {
@@ -178,15 +189,14 @@ public class NIOServer implements Runnable {
 		
 		Attachment attachment = (Attachment) key.attachment();
 		attachment.setStatus(status);
-		
+		crawlerList.get(attachment.getIdentifier()).abort();
+		crawlerList.get(attachment.getIdentifier()).wake();
 		if (status != Status.CONNECTED) {
+			System.out.println("SliceCrawler " + ((Attachment)key.attachment()).getIdentifier() + " failed to connect: " + status.toString());
 			crawlerList.get(attachment.getIdentifier()).abort();
 			resultHandler.connectFailed(key);
 			key.cancel();
-			return;
 		}
-		
-		crawlerList.get(attachment.getIdentifier()).wake();
 	}
 	
 	private void read(SelectionKey key) throws IOException {
@@ -214,7 +224,7 @@ public class NIOServer implements Runnable {
 		
 		resultHandler.handle(dataCopy, key);
 		resultHandler.finishRead(key);
-		
+		System.out.println("SliceCrawler " + crawlerList.get(attachment.getIdentifier()) + " should be woken up!");
 		crawlerList.get(attachment.getIdentifier()).wake(); // potential abort problems here
 	}
 	

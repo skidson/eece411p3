@@ -31,10 +31,10 @@ public class MasterHandler implements DataHandler {
 	
 	/* ************************************ HELPER METHODS ************************************ */
 	public void handle(byte[] data, SelectionKey Key) {
-		if (data.toString().contains("WAKEUP")) {
+		if (data.toString().contains(SliceCrawler.WAKE_REQUEST)) {
 			owner.wake(data);
 			return;
-		} else if (data.toString().contains("DIE")){
+		} else if (data.toString().contains(SliceCrawler.KILL_REQUEST)){
 			owner.reset();
 		}
 		
@@ -44,9 +44,9 @@ public class MasterHandler implements DataHandler {
 		}
 	}
 	
-	// TODO make a diagnosticCrawler that crawls nodes that should be awake, if dead, add another to wakelist
 	public void connectFailed(SelectionKey key) {
-//		owner.
+		wakeList.add(owner.requestWorker());
+		key.cancel();
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {	
@@ -58,7 +58,7 @@ public class MasterHandler implements DataHandler {
 	}
 	
 	public void finishWrite(SelectionKey key) throws IOException {
-		// TODO close channel
+		key.cancel();
 	}
 	
 	/* Workers may be spawned or killed based on free memory */
