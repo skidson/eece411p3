@@ -138,22 +138,27 @@ public class MasterHandler implements DataHandler {
 		String dataS = new String(data);
 		String Peers = new String();
 		String Leaves = new String();
+		String[] nodeSeg;
 		int startIndex, portNum, endIndex;        
 		
-		startIndex = dataS.indexOf("Address: ");
-		endIndex = dataS.indexOf("\n", startIndex);
-		Address = dataS.substring(startIndex+9, endIndex);
+		nodeSeg = dataS.split(";");
 		
-		startIndex = dataS.indexOf("Port: ");
-		endIndex = dataS.indexOf("\n", startIndex);
-		Port = dataS.substring(startIndex+6, endIndex);
+		for (int i = 0; i < nodeSeg.length; i++)
+		{
+		startIndex = nodeSeg[i].indexOf("Address: ");
+		endIndex = nodeSeg[i].indexOf("\n", startIndex);
+		Address = nodeSeg[i].substring(startIndex+9, endIndex);
+		
+		startIndex = nodeSeg[i].indexOf("Port: ");
+		endIndex = nodeSeg[i].indexOf("\n", startIndex);
+		Port = nodeSeg[i].substring(startIndex+6, endIndex);
 		tempnode = new Node(Address, Integer.parseInt(Port));
 		
-		startIndex = dataS.indexOf("Peers: ");
+		startIndex = nodeSeg[i].indexOf("Peers: ");
 		if (!(startIndex == -1)) {
-			endIndex = dataS.indexOf("\n", startIndex);
+			endIndex = nodeSeg[i].indexOf("\n", startIndex);
 			if (!(endIndex == -1)) {
-				Peers = dataS.substring(startIndex+7, endIndex);
+				Peers = nodeSeg[i].substring(startIndex+7, endIndex);
 
 				tempArray = Peers.split(",");
 				for (int j = 0; j < tempArray.length; j++) {
@@ -162,18 +167,18 @@ public class MasterHandler implements DataHandler {
 					if (!(owner.ipCache.isCached(readArray[0].toString()))) {
 						readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 						portNum = Integer.parseInt(readArray[1]);
-						addressPort = readArray[1] + ":" + portNum;
+						addressPort = readArray[0] + ":" + portNum;
 						addUltrapeer(addressPort);
 					}
 				}	
 			} 
 		} 
-		startIndex = dataS.indexOf("Leaves: ");
+		startIndex = nodeSeg[i].indexOf("Leaves: ");
 		if (!(startIndex == -1)) {
-			endIndex = dataS.indexOf("\n", startIndex);
+			endIndex = nodeSeg[i].indexOf("\n", startIndex);
 			if (!(endIndex == -1)) {
 				//System.out.println((startIndex+8) + "  " +  endIndex);
-				Leaves = dataS.substring(startIndex+8,endIndex);
+				Leaves = nodeSeg[i].substring(startIndex+8,endIndex);
 
 				tempArray2 = Leaves.split(",");
 				if (!(tempArray2.length < 2)) {
@@ -183,15 +188,17 @@ public class MasterHandler implements DataHandler {
 						if (!(owner.ipCache.isCached(readArray[0].toString()))) { 
 							readArray[1] = readArray[1].replaceAll("(\\r|\\n)", ""); 
 							int portNum2 = Integer.parseInt(readArray[1]);
-							addressPort = readArray[1] + ":" + portNum2;
+							addressPort = readArray[0] + ":" + portNum2;
 							addLeaf(addressPort);
 						}
 					}
 				}
 			} 
 		} 
+		}
 		return tempnode;
 	}
+
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	private class Logger implements Runnable {
