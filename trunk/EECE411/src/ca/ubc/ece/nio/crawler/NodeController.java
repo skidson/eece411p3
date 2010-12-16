@@ -8,7 +8,6 @@ import java.util.Vector;
 
 public class NodeController {
 	// Constants
-	private static final int NODE_COUNT = 550;
 	
 	// Program variables
 	private Vector<WorkerNode> nodes;
@@ -30,7 +29,7 @@ public class NodeController {
 		BufferedReader br;
 		try {
 			br = new BufferedReader(new FileReader(filename));
-			for (int i = 0; i < NODE_COUNT; i++) {
+			while(true) {
 				String newLine = br.readLine();
 				if (newLine != null) {
 					WorkerNode worker = new WorkerNode(newLine);

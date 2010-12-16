@@ -23,6 +23,9 @@ public class SlaveHandler implements DataHandler {
 		this.ultraList = new Vector<String>();
 		this.leafList = new Vector<String>();
 		this.workSync = new Object();
+		
+		// testing
+		ultraList.add("reala.ece.ubc.ca:5627");
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
@@ -31,7 +34,8 @@ public class SlaveHandler implements DataHandler {
 		// Can call public Slave functions
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
-		if (data.toString().contains("WAKEUP")) {
+		String request = new String(data);
+		if (request.contains("WAKEUP")) {
 			owner.wake(data);
 			return;
 		}
@@ -58,10 +62,11 @@ public class SlaveHandler implements DataHandler {
 				"\r\nPort: " + attachment.getPort() + 
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
 		handle(failData, key);
+		key.cancel();
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {
-		key.channel().close();
+		key.cancel();
 	}
 	
 	public void finishWrite(SelectionKey key) {
@@ -99,9 +104,9 @@ public class SlaveHandler implements DataHandler {
 	
 	public String getWork() {
 		if (!ultraList.isEmpty())
-			return (ultraList.remove(FRONT) + ";U");
+			return (ultraList.remove(FRONT));
 		else if (!leafList.isEmpty())
-			return (leafList.remove(FRONT) + ";L");
+			return (leafList.remove(FRONT));
 		else
 			return null;
 	}
