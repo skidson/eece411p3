@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -104,7 +105,9 @@ public class NIOServer implements Runnable {
 					SelectionKey key = (SelectionKey) selectedKeys.next();
 					selectedKeys.remove();
 					
-					if (key.isConnectable())
+					if (key.isAcceptable()) {
+						accept(key);
+					} else if (key.isConnectable())
 						connect(key);
 					else if(key.isReadable())
 						read(key);
@@ -173,6 +176,19 @@ public class NIOServer implements Runnable {
 	    selector.wakeup();
 	    return socketChannel;
 	}
+	
+	private void accept(SelectionKey key) throws IOException {
+	    // For an accept to be pending the channel must be a server socket channel.
+	    ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+
+	    // Accept the connection and make it non-blocking
+	    SocketChannel socketChannel = serverSocketChannel.accept();
+	    socketChannel.configureBlocking(false);
+	    
+	    // Register the new SocketChannel with our Selector, indicating
+	    // we'd like to be notified when there's data waiting to be read
+	    socketChannel.register(this.selector, SelectionKey.OP_READ, new Attachment());
+	  }
 	
 	private void connect(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
@@ -312,6 +328,10 @@ public class NIOServer implements Runnable {
 		public int getType() { return type; }
 		public int getOps() { return ops; }
 		public int getId() { return id; }
+	}
+	
+	private class Listener {
+		
 	}
 	
 }
