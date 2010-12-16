@@ -9,6 +9,7 @@ public class Slave implements Runnable, CrawlerNode {
 	public static final int NIO_PORT = 1337;
 	public static final int MANAGEMENT_PORT = 1377;
 	public static final int NUM_CRAWLERS = 2;
+	public static final String MASTER_ADDRESS = "146-179.surfsnel.dsl.internl.net";
 	
 	// Program variables
 	private NIOServer server;

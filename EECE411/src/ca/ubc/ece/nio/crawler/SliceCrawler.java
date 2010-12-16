@@ -6,8 +6,8 @@ import java.nio.channels.SocketChannel;
 public class SliceCrawler implements Crawler {
 	// Constants
 	public static final int FRONT = 0;
-	public static final String WAKE_REQUEST = "WAKEUP";
-	public static final String KILL_REQUEST = "WAKEUP";
+	public static final String WAKE_REQUEST = "WAKEUP;";
+	public static final String KILL_REQUEST = "DIE;";
 	
 	private boolean abort = false;
 	private boolean running = true;
@@ -23,6 +23,7 @@ public class SliceCrawler implements Crawler {
 		this.id = id;
 		this.handler = handler;
 		this.server = server;
+		this.request = request + "MASTER=" + Slave.MASTER_ADDRESS + ";";
 	}
 
 	public void abort() {
