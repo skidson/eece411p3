@@ -63,7 +63,7 @@ public class SliceCrawler implements Crawler {
 			if(abort) {
 				System.out.println("SliceCrawler " + id + " connection aborted"); // debug
 				abort = false;
-				handler.removeWorkerNode(address);
+				handler.replaceWorker(address);
 				continue;
 			}
 

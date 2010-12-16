@@ -11,7 +11,7 @@ public class Master implements Runnable, CrawlerNode {
 	private static final int MS_TO_SEC = 1000;
 	private static final String NODE_LIST = "node_list.txt";
 	public static final int MANAGEMENT_PORT = 1377;
-	public static final int NUM_CRAWLERS = 10;
+	public static final int NUM_CRAWLERS = 3;
 	public static final int NUM_WORKERS = 100;
 	
 	// Run settings
@@ -198,8 +198,8 @@ public class Master implements Runnable, CrawlerNode {
 		return timeout;
 	}
 	
-	public String requestWorker() {
-		return(controller.selectWorker());
+	public String replaceWorker(String deadNode) {
+		return(controller.replaceWorker(deadNode));
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */

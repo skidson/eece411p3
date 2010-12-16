@@ -45,7 +45,6 @@ public class MasterHandler implements DataHandler {
 	}
 	
 	public void connectFailed(SelectionKey key) {
-		wakeList.add(owner.requestWorker());
 		key.cancel();
 	}
 	
@@ -94,10 +93,11 @@ public class MasterHandler implements DataHandler {
 		wakeList.add(node);
 	}
 	
-	public void removeWorkerNode(String address) {
+	public void replaceWorker(String address) {
 		for (int i = 0; i < workingList.size(); i++) {
-			if (workingList.get(i).equals(address))
-				workingList.removeElementAt(i);
+			if (workingList.get(i).equals(address)) {
+				wakeList.add(owner.replaceWorker(workingList.remove(i)));
+			}
 		}
 	}
 	
