@@ -105,6 +105,7 @@ public class Master implements Runnable, CrawlerNode {
 		
 		while(running) {
 			// TODO provide commandline interface
+			
 			System.out.print("\r\ncrawler>$ ");
 			Scanner in = new Scanner(System.in);
 			String command = in.nextLine();
