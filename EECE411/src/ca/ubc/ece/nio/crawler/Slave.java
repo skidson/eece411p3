@@ -9,7 +9,7 @@ public class Slave implements Runnable, CrawlerNode {
 	public static final int NIO_PORT = 1337;
 	public static final int MANAGEMENT_PORT = 1377;
 	public static final int NUM_CRAWLERS = 2;
-	public static final String MASTER_ADDRESS = "146-179.surfsnel.dsl.internl.net";
+	public static final String DEFAULT_MASTER = "146-179.surfsnel.dsl.internl.net";
 	
 	// Program variables
 	private NIOServer server;
@@ -33,6 +33,7 @@ public class Slave implements Runnable, CrawlerNode {
 		this.portNum = portNum;
 		this.handler = new SlaveHandler(this);
 		this.server = new NIOServer(hostName, portNum, handler, this);
+		this.masterAddress = DEFAULT_MASTER;
 	}
 	
 	public static void main(String args[]) {
@@ -113,7 +114,12 @@ public class Slave implements Runnable, CrawlerNode {
 		} catch (InterruptedException e) {}
 	}
 	
-	public void wake(byte[] data) {
+	public void wake(byte[] rawData) {
+		String data = new String(rawData);
+		if (data.contains("MASTER")) {
+			this.masterAddress = data.split("=")[1];
+		}
+			
 		if (!running) {
 			synchronized(server) {
 				server.notifyAll();

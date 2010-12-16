@@ -24,7 +24,7 @@ public class SliceCrawler implements Crawler {
 		this.id = id;
 		this.handler = handler;
 		this.server = server;
-		this.request = request + "MASTER=" + Slave.MASTER_ADDRESS + ";";
+		this.request = request + server.getMasterAddress();
 	}
 
 	public void abort() {
