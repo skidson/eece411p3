@@ -3,11 +3,11 @@ package ca.ubc.ece.nio.crawler.slave;
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Vector;
 
 import ca.ubc.ece.nio.crawler.Attachment;
 import ca.ubc.ece.nio.crawler.DataHandler;
-import ca.ubc.ece.nio.crawler.master.SliceCrawler;
 
 public class SlaveHandler implements DataHandler {
 	// Constants
@@ -39,7 +39,7 @@ public class SlaveHandler implements DataHandler {
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
 		String request = new String(data);
-		if (request.contains(SliceCrawler.WAKE_REQUEST)) {
+		if (request.contains("WAKEUP")) {
 			owner.wake(data);
 			return;
 		}
@@ -118,8 +118,8 @@ public class SlaveHandler implements DataHandler {
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	private class Relayer implements Runnable {
 		boolean running = true;
-//		int count = 0;
-//		byte[] toBeSent = new byte[8192];
+		int count = 0;
+		byte[] toBeSent = new byte[8192];
 		
 		public void run() {
 			while(running) {
@@ -131,10 +131,19 @@ public class SlaveHandler implements DataHandler {
 					} catch (InterruptedException e) { continue; }
 				}
 			}
-		//TODO CAN BE BUFFERED SOME HOW 	
 			//toBeSent = (new String(toBeSent)+ new String(dataList.remove(FRONT)) + "\r\n").getBytes();
 			System.out.println("Sending data: " + new String(dataList.get(FRONT)));
 			owner.sendToMaster(dataList.remove(FRONT));
+			
+			// Buffer:
+			// Essentially, hold 10 nodes, each seperated by a ;, send them then clear for next nodes.
+//			toBeSent = (new String(toBeSent) + new String(dataList.remove(FRONT)) + ";" + "\r\n").getBytes();
+//			count++;
+//			if (count == 10) {
+//				owner.sendToMaster(toBeSent);
+//				Arrays.fill(toBeSent,(byte)0);
+//				count = 0;
+//			} 
 		}
 
 		
