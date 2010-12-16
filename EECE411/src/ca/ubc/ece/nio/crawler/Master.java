@@ -9,9 +9,10 @@ import java.util.Vector;
 public class Master implements Runnable, CrawlerNode {
 	// Constants
 	private static final int MS_TO_SEC = 1000;
-	private static final String NODE_LIST = "node_list_all";
+	private static final String NODE_LIST = "node_list_all.txt";
 	public static final int MANAGEMENT_PORT = 1377;
 	public static final int NUM_CRAWLERS = 5;
+	public static final int NUM_WORKERS = 100;
 	
 	// Run settings
 	private boolean full;
@@ -28,6 +29,7 @@ public class Master implements Runnable, CrawlerNode {
 	private MasterHandler handler;
 	public IPCache ipCache;
 	private String masterAddress;
+	private boolean running = true;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	
@@ -94,10 +96,14 @@ public class Master implements Runnable, CrawlerNode {
 	
 	public void run() {
 		new Thread(server).start();
+		Vector<String> workers = controller.getWorkers(NUM_WORKERS);
+		for(String worker : workers)
+			handler.addNodeToWake(worker);
+		
 		for (int i = 0; i < NUM_CRAWLERS; i++)
 			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), handler, server));
 		
-		while(true) {
+		while(running) {
 			// TODO provide commandline interface
 			System.out.print("\r\ncrawler>$ ");
 			Scanner in = new Scanner(System.in);
@@ -127,19 +133,33 @@ public class Master implements Runnable, CrawlerNode {
 	}
 	
 	public void reset() {
-		// TODO
+		this.server.reset();
+		try {
+			// Allow for other threads to shutdown
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {}
+		int workerCount = handler.getNumWorkers();
+		for(int i = 0; i < workerCount; i++)
+			handler.killWorker(0);
+		this.handler = new MasterHandler(this);
+		run();
 	}
 	
 	public void kill() {
-		// TODO
+		// Kill this node, restart requires bash script or manual configuraton
+		running = false;
+		synchronized(server) { 
+			server.notifyAll();
+		}
+		System.exit(0);
 	}
 	
 	public void addNode(Node node) {
 		nodeList.add(node);
 	}
 	
-	public void sendWork(String work, SocketChannel sc){
-		server.send(sc, work.getBytes());
+	public void sendWork(String work, SocketChannel socketChannel){
+		server.send(socketChannel, work.getBytes());
 	}
 	
 	public boolean wakeNode(int index) {

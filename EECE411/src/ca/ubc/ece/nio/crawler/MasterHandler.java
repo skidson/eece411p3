@@ -46,7 +46,7 @@ public class MasterHandler implements DataHandler {
 	
 	// TODO make a diagnosticCrawler that crawls nodes that should be awake, if dead, add another to wakelist
 	public void connectFailed(SelectionKey key) {
-		// TODO unable to contact node, wake another
+//		owner.
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {	
@@ -66,10 +66,6 @@ public class MasterHandler implements DataHandler {
 		Logger logger = new Logger();
 		loggerList.add(logger);
 		new Thread(logger).start();
-	}
-	
-	public void addCrawler(Crawler crawler) {
-		
 	}
 	
 	public void killWorker(int index) {
@@ -96,6 +92,13 @@ public class MasterHandler implements DataHandler {
 	
 	public void addNodeToWake(String node) {
 		wakeList.add(node);
+	}
+	
+	public void removeWorkerNode(String address) {
+		for (int i = 0; i < workingList.size(); i++) {
+			if (workingList.get(i).equals(address))
+				workingList.removeElementAt(i);
+		}
 	}
 	
 	public String getWork() {

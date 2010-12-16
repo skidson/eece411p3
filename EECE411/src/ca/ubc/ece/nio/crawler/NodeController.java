@@ -4,9 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Vector;
 
 public class NodeController {
@@ -15,32 +12,35 @@ public class NodeController {
 	
 	// Program variables
 	private Vector<WorkerNode> nodes;
-	private Vector<WorkerNode> activeNodes;
+	private int workerCount = 0;
 	
 	/* ************************************ INITIALIZATION ************************************ */
-	public NodeController(String[] nodes) {
-		for (String address : nodes) {
+	public NodeController(String[] addresses) {
+		nodes = new Vector<WorkerNode>();
+		for (String address : addresses) {
 			WorkerNode worker = new WorkerNode(address);
 			this.nodes.add(worker);
+			System.out.println(address);
 		}
 	}
 	
 	public NodeController(String filename) {
 		// Reads in a file given by filename that contains a list of worker nodes
+		nodes = new Vector<WorkerNode>();
 		BufferedReader br;
-		String[] allNodes = new String[NODE_COUNT];
 		try {
-			br = new BufferedReader(new FileReader("node_list_all"));
-			for (int i = 0; i < allNodes.length; i++) {
+			br = new BufferedReader(new FileReader(filename));
+			for (int i = 0; i < NODE_COUNT; i++) {
 				String newLine = br.readLine();
 				if (newLine != null) {
 					WorkerNode worker = new WorkerNode(newLine);
 					this.nodes.add(worker);
-					System.out.println(allNodes[i]); // debug
+					System.out.println(worker.getAddress());
 				}
 			}
 		} catch (FileNotFoundException e) {
 			System.err.println("Error: Could not find file '" + filename + "'");
+			e.printStackTrace();
 		} catch (IOException e) {}
 	}
 	
@@ -82,6 +82,13 @@ public class NodeController {
 	
 	public boolean isWorking(int index) {
 		return nodes.get(index).getWorking();
+	}
+	
+	public Vector<String> getWorkers(int num) {
+		Vector<String> workers = new Vector<String>();
+		for (int i = 0; i < num; i++)
+			workers.add(nodes.get((i + workerCount)/nodes.size()).getAddress());
+		return workers;
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
