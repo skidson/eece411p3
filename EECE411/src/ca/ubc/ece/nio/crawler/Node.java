@@ -1,9 +1,9 @@
 package ca.ubc.ece.nio.crawler;
 
-public interface Node {
-	public String getMasterAddress();
+public interface Node extends Runnable {
 	public void wake(byte[] data);
 	public void reset();
 	public void kill();
+	public String getMasterAddress();
 	public int getTimeout();
 }

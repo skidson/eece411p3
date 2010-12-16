@@ -6,6 +6,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.Vector;
 
+import ca.ubc.ece.nio.crawler.Worker;
 import ca.ubc.ece.nio.crawler.Attachment;
 import ca.ubc.ece.nio.crawler.DataHandler;
 
@@ -121,7 +122,7 @@ public class SlaveHandler implements DataHandler {
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
-	private class Relayer implements Runnable {
+	private class Relayer implements Worker {
 		boolean running = true;
 		int count = 0;
 		byte[] toBeSent = new byte[8192];

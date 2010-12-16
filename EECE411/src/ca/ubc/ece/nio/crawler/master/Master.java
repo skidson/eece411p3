@@ -9,7 +9,7 @@ import java.util.Vector;
 import ca.ubc.ece.nio.crawler.Node;
 import ca.ubc.ece.nio.crawler.NIOServer;
 
-public class Master implements Runnable, Node {
+public class Master implements Node {
 	// Constants
 	private static final int MS_TO_SEC = 1000;
 	private static final String NODE_LIST = "node_list.txt";
@@ -212,7 +212,7 @@ public class Master implements Runnable, Node {
 		return timeout;
 	}
 	
-	public String replaceWorker(String deadNode) {
+	public String replaceSlave(String deadNode) {
 		return(controller.replaceWorker(deadNode));
 	}
 	
