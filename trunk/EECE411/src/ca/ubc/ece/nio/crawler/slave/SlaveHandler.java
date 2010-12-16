@@ -47,6 +47,7 @@ public class SlaveHandler implements DataHandler {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 
 		if(socketChannel.socket().getInetAddress().equals(owner.getMasterAddress())){
+			System.out.println("Data from master!");
 			String[] node = new String(data).split(";");
 			if(node[1].equals("U"))
 				addUltrapeer(node[0]);
@@ -61,6 +62,7 @@ public class SlaveHandler implements DataHandler {
 	}
 	
 	public void connectFailed(SelectionKey key) {
+		System.out.println("Connection failed");
 		Attachment attachment = (Attachment) key.attachment();
 		byte[] failData = ("Address: " + attachment.getAddress() + 
 				"\r\nPort: " + attachment.getPort() + 
@@ -83,6 +85,7 @@ public class SlaveHandler implements DataHandler {
 	}
 	
 	public void spawnWorker() {
+		System.out.println("Spawning Relayer!");
 		Relayer relayer = new Relayer();
 		workerList.add(relayer);
 		new Thread(relayer).start();
@@ -93,6 +96,7 @@ public class SlaveHandler implements DataHandler {
 	}
 	
 	public void addUltrapeer(String node) {
+		System.out.println("UltraPeer being added!");
 		ultraList.add(node);
 		synchronized(workSync) {
 			workSync.notifyAll();
@@ -107,6 +111,7 @@ public class SlaveHandler implements DataHandler {
 	}
 	
 	public String getWork() {
+		System.out.println("Getting new work!");
 		if (!ultraList.isEmpty())
 			return (ultraList.remove(FRONT));
 		else if (!leafList.isEmpty())

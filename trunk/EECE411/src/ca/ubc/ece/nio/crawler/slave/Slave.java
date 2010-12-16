@@ -86,13 +86,12 @@ public class Slave implements Runnable, CrawlerNode {
 	}
 	
 	public void run() {
-		while(running) {
-			//idle(); // Idle until connection from master
-			new Thread(server).start();
-			for (int i = 0; i < NUM_CRAWLERS; i++)
-				server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), handler, server));
-			idle();
-		}
+		//idle(); // Idle until connection from master
+		new Thread(server).start();
+		idle();
+		for (int i = 0; i < NUM_CRAWLERS; i++)
+			server.addCrawler(new GnutellaCrawler(server.getNumCrawlers(), handler, server));
+		handler.spawnWorker();
 		reset();
 	}
 	
