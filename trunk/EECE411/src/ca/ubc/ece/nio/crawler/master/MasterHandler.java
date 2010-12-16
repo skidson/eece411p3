@@ -7,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.Vector;
 
+import ca.ubc.ece.nio.crawler.Worker;
 import ca.ubc.ece.nio.crawler.DataHandler;
 
 public class MasterHandler implements DataHandler {
@@ -100,7 +101,7 @@ public class MasterHandler implements DataHandler {
 	public void replaceWorker(String address) {
 		for (int i = 0; i < workingList.size(); i++) {
 			if (workingList.get(i).equals(address)) {
-				wakeList.add(owner.replaceWorker(workingList.remove(i)));
+				wakeList.add(owner.replaceSlave(workingList.remove(i)));
 			}
 		}
 	}
@@ -202,7 +203,7 @@ public class MasterHandler implements DataHandler {
 
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
-	private class Logger implements Runnable {
+	private class Logger implements Worker {
 		boolean running = true;
 		
 		public void run() {

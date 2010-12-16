@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import ca.ubc.ece.nio.crawler.Node;
 import ca.ubc.ece.nio.crawler.NIOServer;
 
-public class Slave implements Runnable, Node {
+public class Slave implements Node {
 	// Constants
 	public static final int MS_TO_SEC = 1000;
 	public static final int NIO_PORT = 1337;
