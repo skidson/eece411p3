@@ -37,11 +37,11 @@ public class NIOServer implements Runnable {
 	private List<ChangeRequest> changeRequests;
 	private DataHandler resultHandler;
 	private Vector<Crawler> crawlerList;
-	private CrawlerNode owner;
+	private Node owner;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	
-	public NIOServer(String hostName, int portNum, DataHandler resultHandler, CrawlerNode owner) {
+	public NIOServer(String hostName, int portNum, DataHandler resultHandler, Node owner) {
 		this.hostName = hostName;
 		this.portNum = portNum;
 		this.owner = owner;

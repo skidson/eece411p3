@@ -125,7 +125,7 @@ public class MasterHandler implements DataHandler {
 		}
 	}
 	
-	private Node parseData(byte[] data) {
+	private NodeData parseData(byte[] data) {
 		// Parsing will now only be done at master.
 		// 1. Take in a byte[] data
 		// 2. Extract ultrapeers and leaves from data
@@ -133,7 +133,7 @@ public class MasterHandler implements DataHandler {
 		//		- if not cached, add to ultraList or leafList in the form hostName:portNum (as a string)
 		// 4. Construct Node object from data[] 
 		// 5. Return the constructed Node object
-		Node tempnode = null;
+		NodeData tempnode = null;
 		String[] tempArray, tempArray2, readArray;
 		String ipPort, Address, Port, addressPort;
 		String dataS = new String(data);
@@ -153,7 +153,7 @@ public class MasterHandler implements DataHandler {
 		startIndex = nodeSeg[i].indexOf("Port: ");
 		endIndex = nodeSeg[i].indexOf("\n", startIndex);
 		Port = nodeSeg[i].substring(startIndex+6, endIndex);
-		tempnode = new Node(Address, Integer.parseInt(Port));
+		tempnode = new NodeData(Address, Integer.parseInt(Port));
 		
 		startIndex = nodeSeg[i].indexOf("Peers: ");
 		if (!(startIndex == -1)) {
@@ -217,7 +217,7 @@ public class MasterHandler implements DataHandler {
 						dataList.wait();
 					} catch (InterruptedException e) { continue; }
 				}
-				Node node = parseData(dataList.remove(FRONT));
+				NodeData node = parseData(dataList.remove(FRONT));
 				owner.addNode(node);
 				owner.ipCache.cache(node.getAddress());
 			}

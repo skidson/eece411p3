@@ -3,10 +3,10 @@ package ca.ubc.ece.nio.crawler.slave;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import ca.ubc.ece.nio.crawler.CrawlerNode;
+import ca.ubc.ece.nio.crawler.Node;
 import ca.ubc.ece.nio.crawler.NIOServer;
 
-public class Slave implements Runnable, CrawlerNode {
+public class Slave implements Runnable, Node {
 	// Constants
 	public static final int MS_TO_SEC = 1000;
 	public static final int NIO_PORT = 1337;

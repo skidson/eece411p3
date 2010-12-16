@@ -14,7 +14,7 @@ import java.util.Vector;
 
 import ca.ubc.ece.nio.crawler.Status;
 
-public class Node {
+public class NodeData {
 	private int portNum;
 	private String address;
 	private String hostName;
@@ -22,21 +22,21 @@ public class Node {
 	private Status status;
 	
 	/* ************************************ INITIALIZATION ************************************ */
-	public Node(String address, int portNum) {
+	public NodeData(String address, int portNum) {
 		this.address = address;
 		this.portNum = portNum;
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
-	public boolean containedIn(Vector<Node> list) {
-		for (Node other : list) {
+	public boolean containedIn(Vector<NodeData> list) {
+		for (NodeData other : list) {
 			if (this.equals(other))
 				return true;
 		}
 		return false;
 	}
 	
-	public boolean equals(Node other) {
+	public boolean equals(NodeData other) {
 		if (this.address.equals(other.getAddress()) && this.portNum == other.getPortNum())
 			return true;
 		return false;

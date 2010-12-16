@@ -6,10 +6,10 @@ import java.nio.channels.SocketChannel;
 import java.util.Scanner;
 import java.util.Vector;
 
-import ca.ubc.ece.nio.crawler.CrawlerNode;
+import ca.ubc.ece.nio.crawler.Node;
 import ca.ubc.ece.nio.crawler.NIOServer;
 
-public class Master implements Runnable, CrawlerNode {
+public class Master implements Runnable, Node {
 	// Constants
 	private static final int MS_TO_SEC = 1000;
 	private static final String NODE_LIST = "node_list.txt";
@@ -28,7 +28,7 @@ public class Master implements Runnable, CrawlerNode {
 	// Program variables
 	private NIOServer server;
 	private NodeController controller;
-	private Vector<Node> nodeList;
+	private Vector<NodeData> nodeList;
 	private MasterHandler handler;
 	public IPCache ipCache;
 	private String masterAddress;
@@ -51,7 +51,7 @@ public class Master implements Runnable, CrawlerNode {
 		this.portNum = portNum;
 		this.handler = new MasterHandler(this);
 		this.server = new NIOServer(hostName, portNum, handler, this);
-		this.nodeList = new Vector<Node>();
+		this.nodeList = new Vector<NodeData>();
 		this.ipCache = new IPCache();
 		this.controller = new NodeController(NODE_LIST);
 		this.startTime = System.currentTimeMillis();
@@ -147,7 +147,7 @@ public class Master implements Runnable, CrawlerNode {
 	}
 	
 	public void print() {
-		for (Node node : nodeList)
+		for (NodeData node : nodeList)
 			System.out.println(node.toString());
 	}
 	
@@ -181,7 +181,7 @@ public class Master implements Runnable, CrawlerNode {
 		System.exit(0);
 	}
 	
-	public void addNode(Node node) {
+	public void addNode(NodeData node) {
 		nodeList.add(node);
 	}
 	
@@ -200,7 +200,7 @@ public class Master implements Runnable, CrawlerNode {
 		}
 	}
 	
-	public void backup(Vector<Node> nodelist) {
+	public void backup(Vector<NodeData> nodelist) {
 		// TODO send list to backup
 	}
 
