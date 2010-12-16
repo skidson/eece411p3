@@ -1,5 +1,8 @@
 package ca.ubc.ece.nio.crawler;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
@@ -96,6 +99,7 @@ public class Master implements Runnable, CrawlerNode {
 	
 	public void run() {
 		new Thread(server).start();
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		Vector<String> workers = controller.getWorkers(NUM_WORKERS);
 		for(String worker : workers)
 			handler.addNodeToWake(worker);
@@ -104,11 +108,12 @@ public class Master implements Runnable, CrawlerNode {
 			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), handler, server));
 		
 		while(running) {
+			try {
 			// TODO provide commandline interface
 			
 			System.out.print("\r\ncrawler>$ ");
-			Scanner in = new Scanner(System.in);
-			String command = in.nextLine();
+		      String command = "default";
+		      command = br.readLine();
 			
 			if(command.equals("print")) {
 				print();
@@ -116,9 +121,13 @@ public class Master implements Runnable, CrawlerNode {
 				// TODO tell all nodes to stop
 				System.exit(0);
 			} else if (command.equals("status")) {
-				
+				System.out.println("i'm a status");
 			} else {
 				printHelp();
+			}
+			} catch (IOException ioe) {
+		         System.out.println("IO error from CLI.  System has taken Terrible Terrible Damage.");
+		         System.exit(1);
 			}
 		}
 	}
