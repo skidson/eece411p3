@@ -198,7 +198,6 @@ public class MasterHandler implements DataHandler {
 					} catch (InterruptedException e) { continue; }
 				}
 				Node node = parseData(dataList.remove(FRONT));
-				owner.ipCache.ipCacheSizeCheck();
 				owner.addNode(node);
 				owner.ipCache.cache(node.getAddress());
 			}

@@ -35,6 +35,8 @@ public class NodeController {
 				if (newLine != null) {
 					WorkerNode worker = new WorkerNode(newLine);
 					this.nodes.add(worker);
+				} else {
+					break;
 				}
 			}
 		} catch (FileNotFoundException e) {

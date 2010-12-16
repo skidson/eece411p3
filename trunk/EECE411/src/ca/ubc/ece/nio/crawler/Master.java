@@ -105,8 +105,9 @@ public class Master implements Runnable, CrawlerNode {
 		for(String worker : workers)
 			handler.addNodeToWake(worker);
 		
-		for (int i = 0; i < NUM_CRAWLERS; i++)
+		for (int i = 0; i < NUM_CRAWLERS; i++) {
 			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), handler, server));
+		}
 		// TODO crawl ubc node and add ultrapeers to handler
 		
 		while(running) {
@@ -121,11 +122,16 @@ public class Master implements Runnable, CrawlerNode {
 				// TODO tell all nodes to stop
 				System.exit(0);
 			} else if (command.equals("status")) {
-				
+			} else if (command.equals("reset")) {
+				break;
+			} else if (command.contains("wake")) {
+				String[] args = command.split(" ");
+				// TODO wake node # args[1]
 			} else {
 				printHelp();
 			}
 		}
+		reset();
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
