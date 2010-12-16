@@ -35,7 +35,7 @@ public class SlaveHandler implements DataHandler {
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
 		String request = new String(data);
-		if (request.contains("WAKEUP")) {
+		if (request.contains(SliceCrawler.WAKE_REQUEST)) {
 			owner.wake(data);
 			return;
 		}

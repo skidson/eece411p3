@@ -30,6 +30,7 @@ public class Master implements Runnable, CrawlerNode {
 	public IPCache ipCache;
 	private String masterAddress;
 	private boolean running = true;
+	private long startTime;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	
@@ -50,6 +51,7 @@ public class Master implements Runnable, CrawlerNode {
 		this.nodeList = new Vector<Node>();
 		this.ipCache = new IPCache();
 		this.controller = new NodeController(NODE_LIST);
+		this.startTime = System.currentTimeMillis();
 	}
 	
 	public static void main(String[] args) {
@@ -122,6 +124,7 @@ public class Master implements Runnable, CrawlerNode {
 				// TODO tell all nodes to stop
 				System.exit(0);
 			} else if (command.equals("status")) {
+				printStatus();
 			} else if (command.equals("reset")) {
 				break;
 			} else if (command.contains("wake")) {
@@ -143,6 +146,14 @@ public class Master implements Runnable, CrawlerNode {
 	public void print() {
 		for (Node node : nodeList)
 			System.out.println(node.toString());
+	}
+	
+	public void printStatus() {
+		System.out.println("MEMORY: " + Runtime.getRuntime().freeMemory()/1000 + "/" + Runtime.getRuntime().totalMemory()/1000 + "MB");
+		System.out.println("WORKERS: " + handler.getNumWorkers());
+		System.out.println("CRAWLERS: " + server.getNumCrawlers());
+		System.out.println("NODES CRAWLED: " + nodeList.size());
+		System.out.println("RUNNING TIME: " + ((System.currentTimeMillis() - startTime)/MS_TO_SEC) + " seconds");
 	}
 	
 	public void reset() {

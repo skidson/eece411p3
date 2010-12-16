@@ -273,6 +273,10 @@ public class NIOServer implements Runnable {
 		send(masterSocketChannel, data);
 	}
 	
+	public String getMasterAddress() {
+		return owner.getMasterAddress();
+	}
+	
 	public void reset() {
 		init();
 		for (Crawler crawler : crawlerList)
