@@ -12,7 +12,7 @@ public class MasterHandler implements DataHandler {
 	private static final int FRONT = 0;
 	private static final String OUTPUT_FILE = "results.txt";
 	
-	// Program variables
+	// Program variableslol
 	private Master owner;
 	private Vector<byte[]> dataList;
 	private Vector<Logger> loggerList;
