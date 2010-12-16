@@ -54,6 +54,7 @@ public class SliceCrawler implements Crawler {
 
 			if(abort) {
 				abort = false;
+				handler.removeWorkerNode(address);
 				continue;
 			}
 

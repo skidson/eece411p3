@@ -162,12 +162,10 @@ public class NIOServer implements Runnable {
 	
 	private void connect(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
-		updateAttachment(key);
-		Attachment attachment = (Attachment) key.attachment();
-		
 		Status status = Status.CONNECTED;
 		try {
 			socketChannel.finishConnect();
+			updateAttachment(key);
 		} catch (SocketTimeoutException e) {
 			status = Status.TIMEOUT;
 		} catch (UnknownHostException e) {
@@ -178,6 +176,7 @@ public class NIOServer implements Runnable {
 			status = Status.INTERNAL;
 		}
 		
+		Attachment attachment = (Attachment) key.attachment();
 		attachment.setStatus(status);
 		
 		if (status != Status.CONNECTED) {

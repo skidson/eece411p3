@@ -1,9 +1,6 @@
 package ca.ubc.ece.nio.crawler;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Slave implements Runnable, CrawlerNode {
