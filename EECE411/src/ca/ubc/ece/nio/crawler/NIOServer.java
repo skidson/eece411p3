@@ -85,8 +85,7 @@ public class NIOServer implements Runnable {
 							key.interestOps(change.getOps());
 							break;
 						case ChangeRequest.REGISTER:
-							Attachment attachment = new Attachment();
-							change.getSocketChannel().register(selector, change.getOps(), attachment);
+							change.getSocketChannel().register(selector, change.getOps());
 							break;
 						}
 					}
@@ -124,15 +123,15 @@ public class NIOServer implements Runnable {
 	}
 	
 	private byte[] tag(Attachment attachment) {
-		byte[] addData = ("Address: " + attachment.getAddress() + 
+		byte[] addData = ("\r\nAddress: " + attachment.getAddress() + 
 				"\r\nPort: " + attachment.getPort() + 
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
-		return((dataBuffer.toString() + addData.toString()).getBytes());
+		return((new String(addData)).getBytes());
 	}
 	
 	private byte[] addTag(Attachment attachment, byte[] data) {
 		byte[] addData = tag(attachment);
-		return((data.toString()+ dataBuffer.toString() + addData.toString()).getBytes());
+		return((new String(data) + new String(addData)).getBytes());
 	}
 	
 	public void addCrawler(Crawler crawler) {
@@ -157,6 +156,7 @@ public class NIOServer implements Runnable {
 	    socketChannel.configureBlocking(false);
 	  
 	    // Kick off connection establishment
+	    
 	    socketChannel.connect(new InetSocketAddress(address, port));
 	  
 	    // Queue a channel registration since the caller is not the 
@@ -164,19 +164,19 @@ public class NIOServer implements Runnable {
 	    // an interest in connection events. These are raised when a channel
 	    // is ready to complete connection establishment.
 	    changeRequests.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT, id));
-	    System.out.println("created");
+	    System.out.println("Crawler " + id + " requested connection to " + address + ":" + port);
 	    selector.wakeup();
 	    return socketChannel;
 	}
 	
 	private void connect(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
-		System.out.println("SliceCrawler " + ((Attachment)key.attachment()).getIdentifier() + " connecting..."); // debug
+		System.out.println("Crawler " + ((Attachment)key.attachment()).getIdentifier() + " connecting..."); // debug
 		Status status = Status.CONNECTED;
 		try {
 			socketChannel.finishConnect();
 			updateAttachment(key);
-			System.out.println("SliceCrawler " + ((Attachment)key.attachment()).getIdentifier() + " successfully connected to " + ((Attachment)key.attachment()).getAddress()); // debug
+			System.out.println("Crawler " + ((Attachment)key.attachment()).getIdentifier() + " successfully connected to " + ((Attachment)key.attachment()).getAddress()); // debug
 		} catch (SocketTimeoutException e) {
 			status = Status.TIMEOUT;
 		} catch (UnknownHostException e) {
@@ -189,14 +189,13 @@ public class NIOServer implements Runnable {
 		
 		Attachment attachment = (Attachment) key.attachment();
 		attachment.setStatus(status);
-		crawlerList.get(attachment.getIdentifier()).abort();
-		crawlerList.get(attachment.getIdentifier()).wake();
 		if (status != Status.CONNECTED) {
-			System.out.println("SliceCrawler " + ((Attachment)key.attachment()).getIdentifier() + " failed to connect: " + status.toString());
+			System.out.println("Crawler " + ((Attachment)key.attachment()).getIdentifier() + " failed to connect to: " + status.toString());
 			crawlerList.get(attachment.getIdentifier()).abort();
 			resultHandler.connectFailed(key);
-			key.cancel();
 		}
+		System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
+		crawlerList.get(attachment.getIdentifier()).wake();
 	}
 	
 	private void read(SelectionKey key) throws IOException {
@@ -222,10 +221,13 @@ public class NIOServer implements Runnable {
 		byte[] dataCopy = new byte[data.length];
 		System.arraycopy(data, 0, dataCopy, 0, data.length);
 		
+		System.out.println("Crawler " + attachment.getIdentifier() + " has read data: " + (new String(data)));
+		
 		resultHandler.handle(dataCopy, key);
 		resultHandler.finishRead(key);
-		System.out.println("SliceCrawler " + crawlerList.get(attachment.getIdentifier()) + " should be woken up!");
-		crawlerList.get(attachment.getIdentifier()).wake(); // potential abort problems here
+		
+		System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
+		crawlerList.get(attachment.getIdentifier()).wake();
 	}
 	
 	private void write(SelectionKey key) throws IOException {

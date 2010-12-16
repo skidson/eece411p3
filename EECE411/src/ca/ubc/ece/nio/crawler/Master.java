@@ -9,9 +9,9 @@ import java.util.Vector;
 public class Master implements Runnable, CrawlerNode {
 	// Constants
 	private static final int MS_TO_SEC = 1000;
-	private static final String NODE_LIST = "node_list_all.txt";
+	private static final String NODE_LIST = "node_list.txt";
 	public static final int MANAGEMENT_PORT = 1377;
-	public static final int NUM_CRAWLERS = 1;
+	public static final int NUM_CRAWLERS = 10;
 	public static final int NUM_WORKERS = 100;
 	
 	// Run settings
@@ -173,11 +173,6 @@ public class Master implements Runnable, CrawlerNode {
 	
 	public void sendWork(String work, SocketChannel socketChannel){
 		server.send(socketChannel, work.getBytes());
-	}
-	
-	public boolean wakeNode(int index) {
-		controller.getAddress(index);
-		return false;
 	}
 	
 	public String getMasterAddress() {

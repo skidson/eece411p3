@@ -21,6 +21,7 @@ public class GnutellaCrawler implements Crawler {
 		this.sync = new Object();
 		this.id = id;
 		this.server = server;
+		this.handler = handler;
 	}
 
 	public void abort() {
@@ -44,7 +45,6 @@ public class GnutellaCrawler implements Crawler {
 				node = address.split(":");
 			} else {
 				try {
-					handler.workSync.wait();
 					synchronized(handler.workSync){
 						handler.workSync.wait();
 					}
@@ -58,23 +58,24 @@ public class GnutellaCrawler implements Crawler {
 			// Wait for connection to finish before writing	
 			synchronized(sync) {
 				try {
-					System.out.println("crawler : " + sync + " waiting"); // debug
+					System.out.println("GnutellaCrawler " + id + " waiting for connection..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
 
 			if(abort) {
+				System.out.println("GnutellaCrawler " + id + " connection aborted");
 				abort = false;
 				continue;
 			}
 
-			System.out.println("Attempting to write  " + sync); // debug
+			System.out.println("GnutellaCrawler " + id + "attempting to wake  " + address); // debug
 			server.send(socketChannel, REQUEST.getBytes());
 
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {
 				try {
-					System.out.println("Crawler : " + sync + " waiting");
+					System.out.println("GnutellaCrawler " + id + " waiting for close..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}

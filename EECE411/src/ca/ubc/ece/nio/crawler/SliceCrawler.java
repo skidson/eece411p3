@@ -2,6 +2,7 @@ package ca.ubc.ece.nio.crawler;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.UnresolvedAddressException;
 
 public class SliceCrawler implements Crawler {
 	// Constants
@@ -46,6 +47,7 @@ public class SliceCrawler implements Crawler {
 			System.out.println("SliceCrawler " + id + " crawling " + address);
 			try {
 				socketChannel = server.createConnection(address, server.getPort(), id);
+			} catch (UnresolvedAddressException e) {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -59,7 +61,7 @@ public class SliceCrawler implements Crawler {
 			}
 
 			if(abort) {
-				System.out.println("SliceCrawler " + id + " connection aborted");
+				System.out.println("SliceCrawler " + id + " connection aborted"); // debug
 				abort = false;
 				handler.removeWorkerNode(address);
 				continue;
@@ -71,7 +73,7 @@ public class SliceCrawler implements Crawler {
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {
 				try {
-					System.out.println("SliceCrawler " + id + " waiting for close...");
+					System.out.println("SliceCrawler " + id + " waiting for close..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
