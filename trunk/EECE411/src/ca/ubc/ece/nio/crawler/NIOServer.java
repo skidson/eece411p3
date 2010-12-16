@@ -85,7 +85,9 @@ public class NIOServer implements Runnable {
 							key.interestOps(change.getOps());
 							break;
 						case ChangeRequest.REGISTER:
-							change.getSocketChannel().register(selector, change.getOps());
+							Attachment attachment = new Attachment();
+							attachment.setIdentifier(change.getId());
+							change.getSocketChannel().register(selector, change.getOps(), attachment);
 							break;
 						}
 					}
@@ -190,7 +192,7 @@ public class NIOServer implements Runnable {
 		Attachment attachment = (Attachment) key.attachment();
 		attachment.setStatus(status);
 		if (status != Status.CONNECTED) {
-			System.out.println("Crawler " + ((Attachment)key.attachment()).getIdentifier() + " failed to connect to: " + status.toString());
+			System.out.println("Crawler " + ((Attachment)key.attachment()).getIdentifier() + " failed to connect (" + status.toString() + ")");
 			crawlerList.get(attachment.getIdentifier()).abort();
 			resultHandler.connectFailed(key);
 		}
