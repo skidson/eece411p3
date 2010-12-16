@@ -47,7 +47,7 @@ public class NIOServer implements Runnable {
 		this.owner = owner;
 		this.resultHandler = resultHandler;
 		//TODO LOL FIX PL0X
-		this.pendingData = new Map<SocketChannel, List<ByteBuffer>>();
+		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
 		init();
 		
 		try {

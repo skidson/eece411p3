@@ -111,7 +111,7 @@ public class Master implements Runnable, CrawlerNode {
 			handler.addNodeToWake(worker);
 		
 		for (int i = 0; i < NUM_CRAWLERS; i++) {
-			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), handler, server));
+			server.addCrawler(new InternalCrawler(server.getNumCrawlers(), handler, server));
 		}
 		// TODO crawl ubc node and add ultrapeers to handler
 		

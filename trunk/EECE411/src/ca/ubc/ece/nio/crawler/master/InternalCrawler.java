@@ -7,7 +7,7 @@ import java.nio.channels.UnresolvedAddressException;
 import ca.ubc.ece.nio.crawler.Crawler;
 import ca.ubc.ece.nio.crawler.NIOServer;
 
-public class SliceCrawler implements Crawler {
+public class InternalCrawler implements Crawler {
 	// Constants
 	public static final int FRONT = 0;
 	public static final String WAKE_REQUEST = "WAKEUP;";
@@ -22,7 +22,7 @@ public class SliceCrawler implements Crawler {
 	private MasterHandler handler;
 	private NIOServer server;
 
-	public SliceCrawler(int id, MasterHandler handler, NIOServer server){
+	public InternalCrawler(int id, MasterHandler handler, NIOServer server){
 		this.sync = new Object();
 		this.id = id;
 		this.handler = handler;
