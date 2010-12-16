@@ -1,6 +1,6 @@
 package ca.ubc.ece.nio.crawler;
 
-public interface CrawlerNode {
+public interface Node {
 	public String getMasterAddress();
 	public void wake(byte[] data);
 	public void reset();
