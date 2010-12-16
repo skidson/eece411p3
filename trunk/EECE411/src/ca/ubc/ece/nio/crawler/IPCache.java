@@ -1,5 +1,7 @@
 package ca.ubc.ece.nio.crawler;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 
 
@@ -8,23 +10,32 @@ import java.util.Iterator;
 import java.util.Vector;
 
 public class IPCache {
+	// Constants
+	private static final int FRONT = 0;
+	
+	// Program variables
 	private Vector<IPAddress> cache;
+	private int capacity;
 	
 	public IPCache() {
 		this.cache = new Vector<IPAddress>();
 	}
 	
 	public IPCache(int capacity) {
-		this.cache = new Vector<IPAddress>(capacity);
-	}
-	
-	public void cache(String address) {
-		IPAddress ip = new IPAddress(address.trim());
-		if (!isCached(ip))
-			this.cache.add(ip);
+		this.capacity = capacity;
+		this.cache = new Vector<IPAddress>();
 	}
 	
 	/* ************ HELPER METHODS ************ */
+	
+	public void cache(String address) {
+		IPAddress ip = new IPAddress(address.trim());
+		if (!isCached(ip)) {
+			if (cache.size() >= capacity)
+				cache.remove(FRONT);
+			this.cache.add(ip);
+		}
+	}
 	
 	public boolean isCached(String address) {
 		IPAddress target = new IPAddress(address.trim());
@@ -56,22 +67,6 @@ public class IPCache {
 		return false;
 	}
 	
-	private static byte[] toDomains(String address) {
-		String[] stringDomains = address.split("\\.");
-		byte[] domains = new byte[4];
-		
-		// Encode unsigned value for use with signed bytes
-		int i = 0;
-		for(String domain : stringDomains) {
-			Integer temp = Integer.parseInt(domain);
-			if (temp > 127)
-				temp -= 256;
-			domains[i] = (byte)temp.intValue();
-			i++;
-		}
-		return domains;
-	}
-	
 	public Iterator<IPAddress> iterator() {
 		return(cache.iterator());
 	}
@@ -97,7 +92,9 @@ public class IPCache {
 		byte[] bytes;
 		
 		public IPAddress(String address) {
-			bytes = IPCache.toDomains(address);
+			try {
+				bytes = InetAddress.getByName(address).getAddress();
+			} catch (UnknownHostException e) {}
 		}
 		
 

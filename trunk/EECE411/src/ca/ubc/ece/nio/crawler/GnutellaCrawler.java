@@ -47,7 +47,7 @@ public class GnutellaCrawler implements Crawler {
 					handler.workSync.wait();
 					synchronized(handler.workSync){
 						handler.workSync.wait();
-					}	
+					}
 				} catch (InterruptedException e) {}
 				continue;
 			}

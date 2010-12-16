@@ -1,8 +1,5 @@
 package ca.ubc.ece.nio.crawler;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
@@ -14,7 +11,7 @@ public class Master implements Runnable, CrawlerNode {
 	private static final int MS_TO_SEC = 1000;
 	private static final String NODE_LIST = "node_list_all.txt";
 	public static final int MANAGEMENT_PORT = 1377;
-	public static final int NUM_CRAWLERS = 5;
+	public static final int NUM_CRAWLERS = 1;
 	public static final int NUM_WORKERS = 100;
 	
 	// Run settings
@@ -37,6 +34,11 @@ public class Master implements Runnable, CrawlerNode {
 	/* ************************************ INITIALIZATION ************************************ */
 	
 	public Master(boolean full, boolean verbose, int timeout, int duration, String hostName, int portNum) {
+		try {
+			this.masterAddress = InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
 		this.full = full;
 		this.verbose = verbose;
 		this.timeout = timeout;
@@ -99,21 +101,19 @@ public class Master implements Runnable, CrawlerNode {
 	
 	public void run() {
 		new Thread(server).start();
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		Vector<String> workers = controller.getWorkers(NUM_WORKERS);
+		Vector<String> workers = controller.selectWorkers(NUM_WORKERS);
 		for(String worker : workers)
 			handler.addNodeToWake(worker);
 		
 		for (int i = 0; i < NUM_CRAWLERS; i++)
 			server.addCrawler(new SliceCrawler(server.getNumCrawlers(), handler, server));
+		// TODO crawl ubc node and add ultrapeers to handler
 		
 		while(running) {
-			try {
 			// TODO provide commandline interface
-			
 			System.out.print("\r\ncrawler>$ ");
-		      String command = "default";
-		      command = br.readLine();
+			Scanner in = new Scanner(System.in);
+			String command = in.nextLine();
 			
 			if(command.equals("print")) {
 				print();
@@ -121,13 +121,9 @@ public class Master implements Runnable, CrawlerNode {
 				// TODO tell all nodes to stop
 				System.exit(0);
 			} else if (command.equals("status")) {
-				System.out.println("i'm a status");
+				
 			} else {
 				printHelp();
-			}
-			} catch (IOException ioe) {
-		         System.out.println("IO error from CLI.  System has taken Terrible Terrible Damage.");
-		         System.exit(1);
 			}
 		}
 	}
@@ -139,7 +135,8 @@ public class Master implements Runnable, CrawlerNode {
 	}
 	
 	public void print() {
-		// TODO
+		for (Node node : nodeList)
+			System.out.println(node.toString());
 	}
 	
 	public void reset() {
@@ -189,11 +186,19 @@ public class Master implements Runnable, CrawlerNode {
 	}
 	
 	public void backup(Vector<Node> nodelist) {
-		// TODO send list to master
+		// TODO send list to backup
 	}
 
 	public int getPortNum() {
 		return portNum;
+	}
+	
+	public int getTimeout() {
+		return timeout;
+	}
+	
+	public String requestWorker() {
+		return(controller.selectWorker());
 	}
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */

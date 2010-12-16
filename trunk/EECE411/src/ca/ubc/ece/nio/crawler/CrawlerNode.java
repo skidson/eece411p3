@@ -5,4 +5,5 @@ public interface CrawlerNode {
 	public void wake(byte[] data);
 	public void reset();
 	public void kill();
+	public int getTimeout();
 }

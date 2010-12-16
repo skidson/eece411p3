@@ -6,10 +6,12 @@ import java.nio.channels.SocketChannel;
 public class SliceCrawler implements Crawler {
 	// Constants
 	public static final int FRONT = 0;
-	public static final String REQUEST = "WAKEUP";
+	public static final String WAKE_REQUEST = "WAKEUP";
+	public static final String KILL_REQUEST = "WAKEUP";
 	
 	private boolean abort = false;
 	private boolean running = true;
+	private String request = WAKE_REQUEST;
 	private SocketChannel socketChannel;
 	private Object sync; //Used to determine which crawler needs to handle stuff
 	private int id;
@@ -40,34 +42,50 @@ public class SliceCrawler implements Crawler {
 	public void run(){
 		while(running){
 			String address = handler.getWork();
-			
+			System.out.println("SliceCrawler " + id + " crawling " + address);
 			try {
 				socketChannel = server.createConnection(address, server.getPort(), id);
-			} catch (IOException e) {}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
 			// Wait for connection to finish before writing	
 			synchronized(sync) {
 				try {
-					System.out.println("crawler : " + sync + " waiting"); // debug
+					System.out.println("SliceCrawler " + id + " waiting for connection..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
 
 			if(abort) {
+				System.out.println("SliceCrawler " + id + " connection aborted");
 				abort = false;
 				handler.removeWorkerNode(address);
 				continue;
 			}
 
-			System.out.println("Attempting to wake  " + sync); // debug
-			server.send(socketChannel, REQUEST.getBytes());
+			System.out.println("SliceCrawler " + id + "attempting to wake  " + address); // debug
+			server.send(socketChannel, request.getBytes());
 
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {
 				try {
-					System.out.println("Crawler : " + sync + " waiting");
+					System.out.println("SliceCrawler " + id + " waiting for close...");
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
-		}	
+		}
+	}
+	
+	public void setRequest(String newRequest) {
+		this.request = newRequest;
+	}
+	
+	public void setToWake() {
+		this.request = WAKE_REQUEST;
+	}
+	
+	public void setToKill() {
+		this.request = KILL_REQUEST;
 	}
 }
