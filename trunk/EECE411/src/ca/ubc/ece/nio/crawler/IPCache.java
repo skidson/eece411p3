@@ -2,7 +2,7 @@ package ca.ubc.ece.nio.crawler;
 
 import java.util.Iterator;
 
-// TODO Remove items from cache as size gets large
+
 // TODO make more better
 
 import java.util.Vector;
@@ -37,6 +37,15 @@ public class IPCache {
 		return false;
 	}
 	
+	public void ipCacheSizeCheck() {
+		// TODO Remove items from cache as size gets large
+		// Let large = 25 currently
+		int indexMax = this.cache.capacity();
+		int cacheMax = 25;
+		if (this.cache.capacity() > cacheMax) {
+			this.cache.subList(0, indexMax - cacheMax).clear();	
+		}
+	}
 	private boolean isCached(IPAddress address) {
 		if (cache.isEmpty())
 			return false;
@@ -91,6 +100,7 @@ public class IPCache {
 			bytes = IPCache.toDomains(address);
 		}
 		
+
 		protected byte[] getBytes() {
 			byte[] temp = new byte[4];
 			for (int i = 0; i < bytes.length; i++)
