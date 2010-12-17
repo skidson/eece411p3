@@ -50,11 +50,11 @@ public class MasterHandler implements DataHandler {
 	
 	public void connectFailed(SelectionKey key) {
 		key.cancel();
-		try {
-			key.channel().close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			key.channel().close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {	
