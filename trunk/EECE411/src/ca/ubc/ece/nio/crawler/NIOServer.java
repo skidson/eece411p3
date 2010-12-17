@@ -250,10 +250,11 @@ public class NIOServer implements Runnable {
 		resultHandler.handle(dataCopy, key);
 		resultHandler.finishRead(key);
 		
-		System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
-		
-		if (attachment.getIdentifier() != -1)
+		if (attachment.getIdentifier() != -1) {
 			crawlerList.get(attachment.getIdentifier()).wake();
+			System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
+		} else
+			System.out.println("Data received.");
 	}
 	
 	private void write(SelectionKey key) throws IOException {

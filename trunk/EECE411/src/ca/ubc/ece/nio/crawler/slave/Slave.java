@@ -111,11 +111,13 @@ public class Slave implements Node {
 	}
 	
 	public void idle() {
+		System.out.println("Idling...");
 		try {
 			synchronized(server) {
 				server.wait();
 			}
 		} catch (InterruptedException e) {}
+		System.out.println("Waking up...");
 	}
 	
 	public void wake(byte[] rawData) {
