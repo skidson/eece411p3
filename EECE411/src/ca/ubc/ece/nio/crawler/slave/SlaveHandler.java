@@ -47,7 +47,6 @@ public class SlaveHandler implements DataHandler {
 		}
 		
 		SocketChannel socketChannel = (SocketChannel) key.channel();
-
 		if(socketChannel.socket().getInetAddress().equals(owner.getMasterAddress())){
 			System.out.println("Data from master!"); // debug
 			String[] node = new String(data).split(";");
