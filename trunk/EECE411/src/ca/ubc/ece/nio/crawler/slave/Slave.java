@@ -17,7 +17,7 @@ public class Slave implements Node {
 	// Program variables
 	private NIOServer server;
 	private SlaveHandler handler;
-	private boolean running = true;
+	private boolean running = false;
 	
 	// Run settings
 	private boolean full;
@@ -87,12 +87,14 @@ public class Slave implements Node {
 	
 	public void run() {
 		//idle(); // Idle until connection from master
+		running = false;
 		new Thread(server).start();
 		idle();
+		running = true;
 		for (int i = 0; i < NUM_CRAWLERS; i++)
 			server.addCrawler(new ExternalCrawler(server.getNumCrawlers(), handler, server));
 		handler.spawnWorker();
-		reset();
+		idle();
 	}
 	
 	/* ************************************ HELPER METHODS ************************************ */
@@ -146,8 +148,8 @@ public class Slave implements Node {
 		return masterAddress;
 	}
 	
-	public void sendToMaster(byte[] data){
-		server.sendToMaster(data);
+	public void sendToMaster(byte[] data, int id){
+		server.sendToMaster(data, id);
 	}
 	
 	public int getTimeout() {

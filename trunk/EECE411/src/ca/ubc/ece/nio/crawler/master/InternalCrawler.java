@@ -70,8 +70,8 @@ public class InternalCrawler implements Crawler {
 				continue;
 			}
 
-			System.out.println("InternalCrawler " + id + "attempting to wake  " + address); // debug
-			server.send(socketChannel, request.getBytes());
+			System.out.println("InternalCrawler " + id + " attempting to wake " + address); // debug
+			server.send(socketChannel, request.getBytes(), id);
 
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {

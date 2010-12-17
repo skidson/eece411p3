@@ -186,7 +186,7 @@ public class Master implements Node {
 	}
 	
 	public void sendWork(String work, SocketChannel socketChannel){
-		server.send(socketChannel, work.getBytes());
+		server.send(socketChannel, work.getBytes(), -1);
 	}
 	
 	public String getMasterAddress() {

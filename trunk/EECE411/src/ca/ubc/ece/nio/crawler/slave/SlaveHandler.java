@@ -123,6 +123,7 @@ public class SlaveHandler implements DataHandler {
 	
 	/* ************************************ EMBEDDED CLASSES ************************************ */
 	private class Relayer implements Worker {
+		public static final int RELAYER_ID = -1;
 		boolean running = true;
 		int count = 0;
 		byte[] toBeSent = new byte[8192];
@@ -139,7 +140,7 @@ public class SlaveHandler implements DataHandler {
 			}
 			//toBeSent = (new String(toBeSent)+ new String(dataList.remove(FRONT)) + "\r\n").getBytes();
 			System.out.println("Sending data: " + new String(dataList.get(FRONT)));
-			owner.sendToMaster(dataList.remove(FRONT));
+			owner.sendToMaster(dataList.remove(FRONT), RELAYER_ID);
 			
 			// Buffer:
 			// Essentially, hold 10 nodes, each seperated by a ;, send them then clear for next nodes.

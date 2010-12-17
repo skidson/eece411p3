@@ -281,9 +281,9 @@ public class NIOServer implements Runnable {
 		}
 	}
 	
-	public void send(SocketChannel socket, byte[] data) {
+	public void send(SocketChannel socket, byte[] data, int id) {
 		System.out.println("Attempting to write!");
-		changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
+		changeRequests.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE, id));
 		
 		synchronized(pendingData) {
 			List<ByteBuffer> queue = (List<ByteBuffer>) pendingData.get(socket);
@@ -296,8 +296,8 @@ public class NIOServer implements Runnable {
 		selector.wakeup();
 	}
 	
-	public void sendToMaster(byte[] data){
-		send(masterSocketChannel, data);
+	public void sendToMaster(byte[] data, int id){
+		send(masterSocketChannel, data, id);
 	}
 	
 	public String getMasterAddress() {
@@ -316,12 +316,6 @@ public class NIOServer implements Runnable {
 		public static final int CHANGEOPS = 2;
 		private SocketChannel channel;
 		private int type, ops, id;
-		
-		public ChangeRequest(SocketChannel channel, int type, int ops) {
-			this.channel = channel;
-			this.type = type;
-			this.ops = ops;
-		}
 		
 		public ChangeRequest(SocketChannel channel, int type, int ops, int id) {
 			this.channel = channel;
