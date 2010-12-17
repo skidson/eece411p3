@@ -107,14 +107,6 @@ public class Master implements Node {
 	
 	public void run() {
 		new Thread(server).start();
-		Vector<String> workers = controller.selectWorkers(NUM_WORKERS);
-		for(String worker : workers)
-			handler.addNodeToWake(worker);
-		
-		for (int i = 0; i < NUM_CRAWLERS; i++) {
-			server.addCrawler(new InternalCrawler(server.getNumCrawlers(), handler, server));
-		}
-		// TODO crawl ubc node and add ultrapeers to handler
 		
 		while(running) {
 			// TODO provide commandline interface
@@ -124,6 +116,8 @@ public class Master implements Node {
 			
 			if(command.equals("print")) {
 				print();
+			} else if (command.equals("start")) {
+				start();
 			} else if (command.equals("quit")) {
 				// TODO tell all nodes to stop
 				System.exit(0);
@@ -133,9 +127,6 @@ public class Master implements Node {
 				printStatus();
 			} else if (command.equals("reset")) {
 				break;
-			} else if (command.contains("wake")) {
-				String[] args = command.split(" ");
-				// TODO wake node # args[1]
 			} else {
 				printHelp();
 			}
@@ -146,7 +137,7 @@ public class Master implements Node {
 	/* ************************************ HELPER METHODS ************************************ */
 	
 	public void printHelp() {
-		System.out.println("Commands: print, quit, status");
+		System.out.println("Commands: start, print, quit, status");
 	}
 	
 	public void print() {
@@ -160,6 +151,16 @@ public class Master implements Node {
 		System.out.println("CRAWLERS: " + server.getNumCrawlers());
 		System.out.println("NODES CRAWLED: " + nodeList.size());
 		System.out.println("RUNNING TIME: " + ((System.currentTimeMillis() - startTime)/MS_TO_SEC) + " seconds");
+	}
+	
+	public void start() {
+		Vector<String> workers = controller.selectWorkers(NUM_WORKERS);
+		for(String worker : workers)
+			handler.addNodeToWake(worker);
+		
+		for (int i = 0; i < NUM_CRAWLERS; i++) {
+			server.addCrawler(new InternalCrawler(server.getNumCrawlers(), handler, server));
+		}
 	}
 	
 	public void reset() {
@@ -202,6 +203,9 @@ public class Master implements Node {
 	
 	public void wake(String request) {
 		// TODO wakeup and act as backup
+		synchronized(sync) {
+			sync.notifyAll();
+		}
 		synchronized(server) {
 			server.notifyAll();
 		}

@@ -36,8 +36,8 @@ public class Slave implements Node {
 		this.hostName = hostName;
 		this.portNum = portNum;
 		this.handler = new SlaveHandler(this);
-		this.server = new NIOServer(hostName, portNum, handler, this);
 		this.masterAddress = DEFAULT_MASTER;
+		this.server = new NIOServer(hostName, portNum, handler, this);
 	}
 	
 	public static void main(String args[]) {
@@ -131,7 +131,11 @@ public class Slave implements Node {
 		if (request.contains("BACKUP")) {
 			this.masterAddress = request.split("=")[1];
 		}
-			
+		
+		synchronized(sync) {
+			sync.notifyAll();
+		}
+		
 		if (!running) {
 			synchronized(server) {
 				server.notifyAll();
