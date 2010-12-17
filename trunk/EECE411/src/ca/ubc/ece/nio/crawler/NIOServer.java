@@ -58,14 +58,6 @@ public class NIOServer implements Runnable {
 			serverChannel.socket().bind(new InetSocketAddress(hostName, portNum));
 			serverChannel.socket().setSoTimeout(owner.getTimeout());
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-			try {
-				masterSocketChannel = createConnection(owner.getMasterAddress(), portNum, -1);
-			} catch (IOException e) {
-				 //If this fails, resort to backup
-				try {
-					masterSocketChannel = createConnection(owner.getBackupAddress(), portNum, -1);
-				} catch (IOException e1) { /* your fucked */ }
-			} 
 		} catch (IOException e) {}
 	}
 	
@@ -303,6 +295,21 @@ public class NIOServer implements Runnable {
 	
 	public void sendToMaster(byte[] data, int id){
 		System.out.println("Relayer dumping data to master: " + new String(data)); // debug
+		if (masterSocketChannel == null) {
+			try {
+				masterSocketChannel = createConnection(owner.getMasterAddress(), portNum, -1);
+			} catch (IOException e) {
+				 //If this fails, resort to backup
+				try {
+					masterSocketChannel = createConnection(owner.getBackupAddress(), portNum, -1);
+				} catch (IOException e1) { 
+					// This node has false entries for master and backup addresses, wait for an update
+					try {
+						Node.sync.wait();
+					} catch (InterruptedException e2) {}
+				}
+			} 
+		}
 		send(masterSocketChannel, data, id);
 	}
 	
