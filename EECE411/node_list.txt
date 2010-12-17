@@ -1,3 +1,2 @@
-calc02.info.ucl.ac.be
 calc03.info.ucl.ac.be
 calc04.info.ucl.ac.be
