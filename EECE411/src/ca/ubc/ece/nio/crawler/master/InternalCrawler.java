@@ -10,7 +10,7 @@ import ca.ubc.ece.nio.crawler.NIOServer;
 public class InternalCrawler implements Crawler {
 	// Constants
 	public static final int FRONT = 0;
-	public static final String WAKE_REQUEST = "WAKEUP;";
+	public static final String WAKE_REQUEST = "WAKEUP;MASTER=";
 	public static final String KILL_REQUEST = "DIE;";
 	
 	private boolean abort = false;
@@ -73,13 +73,13 @@ public class InternalCrawler implements Crawler {
 			System.out.println("InternalCrawler " + id + " attempting to wake " + address); // debug
 			server.send(socketChannel, request.getBytes(), id);
 
-			// Wait for this connection to be closed so we can open another
-			synchronized(sync) {
-				try {
-					System.out.println("InternalCrawler " + id + " waiting for close..."); // debug
-					sync.wait();
-				} catch (InterruptedException e) {}
-			}
+//			// Wait for this connection to be closed so we can open another
+//			synchronized(sync) {
+//				try {
+//					System.out.println("InternalCrawler " + id + " waiting for close..."); // debug
+//					sync.wait();
+//				} catch (InterruptedException e) {}
+//			}
 		}
 	}
 	

@@ -40,26 +40,25 @@ public class SlaveHandler implements DataHandler {
 		// Address: a.b.c.d \r\n
 		// Port: #### \r\n
 		String request = new String(data);
+//		System.out.println("Handling " + request + "..."); // debug
 		if (request.contains("WAKEUP")) {
-			owner.wake(data);
-			workSync.notifyAll();
+			owner.wake(request);
 			return;
 		}
 		
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 
 		if(socketChannel.socket().getInetAddress().equals(owner.getMasterAddress())){
-			System.out.println("Data from master!");
+			System.out.println("Data from master!"); // debug
 			String[] node = new String(data).split(";");
 			if(node[1].equals("U"))
 				addUltrapeer(node[0]);
 			else
 				addLeaf(node[0]);
-		} else {
-			synchronized(dataList) {
-				dataList.add(data);
-				dataList.notifyAll();
-			}
+		}
+		synchronized(dataList) {
+			dataList.add(data);
+			dataList.notifyAll();
 		}
 	}
 	
@@ -70,7 +69,14 @@ public class SlaveHandler implements DataHandler {
 				"\r\nPort: " + attachment.getPort() + 
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
 		handle(failData, key);
-		key.cancel();
+		synchronized(key.channel()) {
+			key.cancel();
+			try {
+				key.channel().close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {
@@ -132,6 +138,7 @@ public class SlaveHandler implements DataHandler {
 		public void run() {
 			while(running) {
 				if (dataList.isEmpty()) {
+					System.out.println("Relayer waiting for work");
 					try {
 						synchronized(dataList){
 							dataList.wait();
@@ -140,7 +147,6 @@ public class SlaveHandler implements DataHandler {
 				}
 			}
 			//toBeSent = (new String(toBeSent)+ new String(dataList.remove(FRONT)) + "\r\n").getBytes();
-			System.out.println("Sending data: " + new String(dataList.get(FRONT)));
 			owner.sendToMaster(dataList.remove(FRONT), RELAYER_ID);
 			
 			// Buffer:

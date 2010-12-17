@@ -122,10 +122,9 @@ public class Slave implements Node {
 		System.out.println("Waking up...");
 	}
 	
-	public void wake(byte[] rawData) {
-		String data = new String(rawData);
-		if (data.contains("MASTER")) {
-			this.masterAddress = data.split("=")[1];
+	public void wake(String request) {
+		if (request.contains("MASTER")) {
+			this.masterAddress = request.split("=")[1];
 		}
 			
 		if (!running) {

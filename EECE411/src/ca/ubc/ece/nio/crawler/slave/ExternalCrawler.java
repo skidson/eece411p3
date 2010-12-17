@@ -11,11 +11,10 @@ public class ExternalCrawler implements Crawler {
 	public static final String REQUEST = "GNUTELLA CONNECT/0.6\r\n" + "User-Agent: UBCECE (crawl)\r\n" + "Query-Routing: 0.2\r\n" + "X-Ultrapeer: False\r\n" + "Crawler: 0.1\r\n" + "\r\n";
 	public static final int FRONT = 0;
 	
-	private String[] node;
+	// Program variables
 	private boolean abort = false;
 	private boolean running = true;
-	private SocketChannel socketChannel;
-	private Object sync; //Used to determine which crawler needs to handle stuff
+	private Object sync;
 	private int id;
 	private NIOServer server;
 	private SlaveHandler handler;
@@ -43,13 +42,15 @@ public class ExternalCrawler implements Crawler {
 
 	public void run(){
 		while(running){
+			String[] node;
+			SocketChannel socketChannel = null;
 			String address = handler.getWork();
 			if (address != null) {
 				node = address.split(":");
 			} else {
 				try {
 					synchronized(handler.workSync){
-						System.out.println("GnutellaCralwer " + id + "waiting for work!");
+						System.out.println("ExternalCrawler " + id + " waiting for work!");
 						handler.workSync.wait();
 					}
 				} catch (InterruptedException e) {}
@@ -77,12 +78,12 @@ public class ExternalCrawler implements Crawler {
 			server.send(socketChannel, REQUEST.getBytes(), id);
 
 			// Wait for this connection to be closed so we can open another
-			synchronized(sync) {
-				try {
-					System.out.println("ExternalCrawler " + id + " waiting for close..."); // debug
-					sync.wait();
-				} catch (InterruptedException e) {}
-			}
+//			synchronized(sync) {
+//				try {
+//					System.out.println("ExternalCrawler " + id + " waiting for close..."); // debug
+//					sync.wait();
+//				} catch (InterruptedException e) {}
+//			}
 		}	
 	}
 }
