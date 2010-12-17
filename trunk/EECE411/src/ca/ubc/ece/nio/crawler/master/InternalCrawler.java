@@ -47,7 +47,7 @@ public class InternalCrawler implements Crawler {
 	public void run(){
 		while(running){
 			String address = handler.getWork();
-			System.out.println("SliceCrawler " + id + " crawling " + address);
+			System.out.println("InternalCrawler " + id + " crawling " + address);
 			try {
 				socketChannel = server.createConnection(address, server.getPort(), id);
 			} catch (UnresolvedAddressException e) {
@@ -58,25 +58,25 @@ public class InternalCrawler implements Crawler {
 			// Wait for connection to finish before writing	
 			synchronized(sync) {
 				try {
-					System.out.println("SliceCrawler " + id + " waiting for connection..."); // debug
+					System.out.println("InternalCrawler " + id + " waiting for connection..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
 
 			if(abort) {
-				System.out.println("SliceCrawler " + id + " connection aborted"); // debug
+				System.out.println("InternalCrawler " + id + " connection aborted"); // debug
 				abort = false;
 				handler.replaceWorker(address);
 				continue;
 			}
 
-			System.out.println("SliceCrawler " + id + "attempting to wake  " + address); // debug
+			System.out.println("InternalCrawler " + id + "attempting to wake  " + address); // debug
 			server.send(socketChannel, request.getBytes());
 
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {
 				try {
-					System.out.println("SliceCrawler " + id + " waiting for close..."); // debug
+					System.out.println("InternalCrawler " + id + " waiting for close..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
