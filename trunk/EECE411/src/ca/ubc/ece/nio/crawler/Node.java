@@ -5,5 +5,6 @@ public interface Node extends Runnable {
 	public void reset();
 	public void kill();
 	public String getMasterAddress();
+	public String getBackupAddress();
 	public int getTimeout();
 }

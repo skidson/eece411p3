@@ -26,6 +26,7 @@ public class Slave implements Node {
 	private String hostName;
 	private int portNum;
 	private String masterAddress;
+	private String backupAddress;
 	
 	/* ************************************ INITIALIZATION ************************************ */
 	public Slave(boolean full, int timeout, int duration, String hostName, int portNum) {
@@ -126,6 +127,10 @@ public class Slave implements Node {
 		if (request.contains("MASTER")) {
 			this.masterAddress = request.split("=")[1];
 		}
+		
+		if (request.contains("BACKUP")) {
+			this.masterAddress = request.split("=")[1];
+		}
 			
 		if (!running) {
 			synchronized(server) {
@@ -145,6 +150,10 @@ public class Slave implements Node {
 	
 	public String getMasterAddress() {
 		return masterAddress;
+	}
+	
+	public String getBackupAddress() {
+		return backupAddress;
 	}
 	
 	public void sendToMaster(byte[] data, int id){

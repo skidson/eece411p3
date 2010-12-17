@@ -58,14 +58,14 @@ public class NIOServer implements Runnable {
 			serverChannel.socket().bind(new InetSocketAddress(hostName, portNum));
 			serverChannel.socket().setSoTimeout(owner.getTimeout());
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-//			try {
-//				masterSocketChannel = createConnection(owner.getMasterAddress(), portNum, -1);
-//			} catch (IOException e) {
-//				 If this fails, resort to backup
-//				try {
-//					masterSocketChannel = createConnection(backup, portNum, 5);
-//				} catch (IOException e1) { /* your fucked */ }
-//			} 
+			try {
+				masterSocketChannel = createConnection(owner.getMasterAddress(), portNum, -1);
+			} catch (IOException e) {
+				 //If this fails, resort to backup
+				try {
+					masterSocketChannel = createConnection(owner.getBackupAddress(), portNum, -1);
+				} catch (IOException e1) { /* your fucked */ }
+			} 
 		} catch (IOException e) {}
 	}
 	
