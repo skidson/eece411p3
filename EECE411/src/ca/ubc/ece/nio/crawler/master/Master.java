@@ -32,6 +32,7 @@ public class Master implements Node {
 	private MasterHandler handler;
 	public IPCache ipCache;
 	private String masterAddress;
+	private String backupAddress;
 	private boolean running = true;
 	private long startTime;
 	
@@ -193,6 +194,10 @@ public class Master implements Node {
 	
 	public String getMasterAddress() {
 		return masterAddress;
+	}
+	
+	public String getBackupAddress() {
+		return backupAddress;
 	}
 	
 	public void wake(String request) {
