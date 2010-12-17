@@ -123,16 +123,15 @@ public class NIOServer implements Runnable {
 		attachment.setPort(port);
 	}
 	
-	private byte[] tag(Attachment attachment) {
+	private String getTag(Attachment attachment) {
 		byte[] addData = ("\r\nAddress: " + attachment.getAddress() + 
 				"\r\nPort: " + attachment.getPort() + 
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
-		return((new String(addData)).getBytes());
+		return(new String(addData));
 	}
 	
 	private byte[] addTag(Attachment attachment, byte[] data) {
-		byte[] addData = tag(attachment);
-		return((new String(data) + new String(addData)).getBytes());
+		return((new String(data) + getTag(attachment)).getBytes());
 	}
 	
 	public void addCrawler(Crawler crawler) {

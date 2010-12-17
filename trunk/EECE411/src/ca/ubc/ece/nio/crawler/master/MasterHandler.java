@@ -64,7 +64,6 @@ public class MasterHandler implements DataHandler {
 			owner.sendWork(ultraList.remove(FRONT) + ";U", socketChannel);
 		} else if (!leafList.isEmpty())
 			owner.sendWork(leafList.remove(FRONT) + ";L", socketChannel);
-		key.cancel();
 	}
 	
 	public void finishWrite(SelectionKey key) throws IOException {
