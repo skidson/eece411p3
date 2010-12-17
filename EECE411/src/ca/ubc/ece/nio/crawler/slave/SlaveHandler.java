@@ -69,14 +69,7 @@ public class SlaveHandler implements DataHandler {
 				"\r\nPort: " + attachment.getPort() + 
 				"\r\nStatus: " + attachment.getStatus().toString()).getBytes();
 		handle(failData, key);
-		synchronized(key.channel()) {
-			key.cancel();
-			try {
-				key.channel().close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		key.cancel();
 	}
 	
 	public void finishRead(SelectionKey key) throws IOException {
