@@ -42,6 +42,7 @@ public class SlaveHandler implements DataHandler {
 		String request = new String(data);
 		if (request.contains("WAKEUP")) {
 			owner.wake(data);
+			workSync.notifyAll();
 			return;
 		}
 		

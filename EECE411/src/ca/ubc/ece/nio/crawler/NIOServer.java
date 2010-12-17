@@ -253,8 +253,9 @@ public class NIOServer implements Runnable {
 		if (attachment.getIdentifier() != -1) {
 			crawlerList.get(attachment.getIdentifier()).wake();
 			System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
-		} else
+		} else {
 			System.out.println("Data received.");
+		}
 	}
 	
 	private void write(SelectionKey key) throws IOException {
@@ -278,6 +279,11 @@ public class NIOServer implements Runnable {
 			if(queue.isEmpty())
 				key.interestOps(SelectionKey.OP_READ);
 			resultHandler.finishWrite(key);
+			Attachment attachment = (Attachment) key.attachment();
+			if (attachment.getIdentifier() != -1) {
+				crawlerList.get(attachment.getIdentifier()).wake();
+				System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
+			}
 		}
 	}
 	
