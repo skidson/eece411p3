@@ -48,7 +48,7 @@ public class NIOServer implements Runnable {
 		this.owner = owner;
 		this.resultHandler = resultHandler;
 		//TODO LOL FIX PL0X
-		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
+		
 		init();
 		
 		try {
@@ -73,6 +73,7 @@ public class NIOServer implements Runnable {
 		this.crawlerList = new Vector<Crawler>();
 		this.changeRequests = new Vector<ChangeRequest>();
 		this.dataBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
 		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
 	}
 	
@@ -187,7 +188,9 @@ public class NIOServer implements Runnable {
 	    
 	    // Register the new SocketChannel with our Selector, indicating
 	    // we'd like to be notified when there's data waiting to be read
-	    socketChannel.register(this.selector, SelectionKey.OP_READ, new Attachment());
+	    Attachment attachment = new Attachment();
+	    attachment.setIdentifier(-1);
+	    socketChannel.register(this.selector, SelectionKey.OP_READ, attachment);
 	  }
 	
 	private void connect(SelectionKey key) throws IOException {
@@ -248,7 +251,9 @@ public class NIOServer implements Runnable {
 		resultHandler.finishRead(key);
 		
 		System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
-		crawlerList.get(attachment.getIdentifier()).wake();
+		
+		if (attachment.getIdentifier() != -1)
+			crawlerList.get(attachment.getIdentifier()).wake();
 	}
 	
 	private void write(SelectionKey key) throws IOException {
