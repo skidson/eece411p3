@@ -245,12 +245,11 @@ public class NIOServer implements Runnable {
 		byte[] dataCopy = new byte[data.length];
 		System.arraycopy(data, 0, dataCopy, 0, data.length);
 		
-		System.out.println("Crawler " + attachment.getIdentifier() + " has read data: " + (new String(data)));
-		
 		resultHandler.handle(dataCopy, key);
 		resultHandler.finishRead(key);
 		
 		if (attachment.getIdentifier() != -1) {
+			System.out.println("Crawler " + attachment.getIdentifier() + " has read data: " + (new String(data)));
 			crawlerList.get(attachment.getIdentifier()).wake();
 			System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
 		} else {
@@ -303,6 +302,7 @@ public class NIOServer implements Runnable {
 	}
 	
 	public void sendToMaster(byte[] data, int id){
+		System.out.println("Relayer dumping data to master: " + new String(data)); // debug
 		send(masterSocketChannel, data, id);
 	}
 	

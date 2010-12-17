@@ -14,7 +14,7 @@ public class Master implements Node {
 	private static final int MS_TO_SEC = 1000;
 	private static final String NODE_LIST = "node_list.txt";
 	public static final int MANAGEMENT_PORT = 1377;
-	public static final int NUM_CRAWLERS = 3;
+	public static final int NUM_CRAWLERS = 1;
 	public static final int NUM_WORKERS = 100;
 	
 	// Run settings
@@ -126,6 +126,8 @@ public class Master implements Node {
 			} else if (command.equals("quit")) {
 				// TODO tell all nodes to stop
 				System.exit(0);
+			} else if (command.equals("reset")) {
+				reset();
 			} else if (command.equals("status")) {
 				printStatus();
 			} else if (command.equals("reset")) {
@@ -193,7 +195,7 @@ public class Master implements Node {
 		return masterAddress;
 	}
 	
-	public void wake(byte[] data) {
+	public void wake(String request) {
 		// TODO wakeup and act as backup
 		synchronized(server) {
 			server.notifyAll();
