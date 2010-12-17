@@ -47,8 +47,6 @@ public class NIOServer implements Runnable {
 		this.portNum = portNum;
 		this.owner = owner;
 		this.resultHandler = resultHandler;
-		//TODO LOL FIX PL0X
-		
 		init();
 		
 		try {
@@ -65,7 +63,6 @@ public class NIOServer implements Runnable {
 		this.crawlerList = new Vector<Crawler>();
 		this.changeRequests = new Vector<ChangeRequest>();
 		this.dataBuffer = ByteBuffer.allocate(BUFFER_SIZE);
-		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
 		this.pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
 	}
 	
@@ -207,13 +204,11 @@ public class NIOServer implements Runnable {
 		if (status != Status.CONNECTED) {
 			System.out.println("Crawler " + ((Attachment)key.attachment()).getIdentifier() + " failed to connect (" + status.toString() + ")");
 			crawlerList.get(attachment.getIdentifier()).abort();
+			
 			resultHandler.connectFailed(key);
 		}
-		
-		if (attachment.getIdentifier() != -1) {
+		if (attachment.getIdentifier() != -1)
 			crawlerList.get(attachment.getIdentifier()).wake();
-			System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
-		}
 	}
 	
 	private void read(SelectionKey key) throws IOException {
