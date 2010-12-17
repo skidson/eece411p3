@@ -145,7 +145,6 @@ public class SlaveHandler implements DataHandler {
 						}
 					} catch (InterruptedException e) { continue; }
 				}
-			}
 			//toBeSent = (new String(toBeSent)+ new String(dataList.remove(FRONT)) + "\r\n").getBytes();
 			owner.sendToMaster(dataList.remove(FRONT), RELAYER_ID);
 			
@@ -157,6 +156,7 @@ public class SlaveHandler implements DataHandler {
 //				owner.sendToMaster(toBeSent);
 //				Arrays.fill(toBeSent,(byte)0);
 //				count = 0;
+			}
 //			} 
 		}
 
