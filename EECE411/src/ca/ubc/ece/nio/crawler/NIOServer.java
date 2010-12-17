@@ -209,8 +209,11 @@ public class NIOServer implements Runnable {
 			crawlerList.get(attachment.getIdentifier()).abort();
 			resultHandler.connectFailed(key);
 		}
-		System.out.println("Crawler " + attachment.getIdentifier() + " waking up...");
-		crawlerList.get(attachment.getIdentifier()).wake();
+		
+		if (attachment.getIdentifier() != -1) {
+			crawlerList.get(attachment.getIdentifier()).wake();
+			System.out.println("Crawler " + attachment.getIdentifier() + " waking up!");
+		}
 	}
 	
 	private void read(SelectionKey key) throws IOException {
