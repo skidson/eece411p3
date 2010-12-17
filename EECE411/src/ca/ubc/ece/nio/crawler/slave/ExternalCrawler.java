@@ -62,24 +62,24 @@ public class ExternalCrawler implements Crawler {
 			// Wait for connection to finish before writing	
 			synchronized(sync) {
 				try {
-					System.out.println("GnutellaCrawler " + id + " waiting for connection..."); // debug
+					System.out.println("ExternalCrawler " + id + " waiting for connection..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
 
 			if(abort) {
-				System.out.println("GnutellaCrawler " + id + " connection aborted");
+				System.out.println("ExternalCrawler " + id + " connection aborted");
 				abort = false;
 				continue;
 			}
 
-			System.out.println("GnutellaCrawler " + id + "attempting to wake  " + address); // debug
+			System.out.println("ExternalCrawler " + id + " requesting node information from " + address); // debug
 			server.send(socketChannel, REQUEST.getBytes());
 
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {
 				try {
-					System.out.println("GnutellaCrawler " + id + " waiting for close..."); // debug
+					System.out.println("ExternalCrawler " + id + " waiting for close..."); // debug
 					sync.wait();
 				} catch (InterruptedException e) {}
 			}
