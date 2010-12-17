@@ -74,7 +74,7 @@ public class ExternalCrawler implements Crawler {
 			}
 
 			System.out.println("ExternalCrawler " + id + " requesting node information from " + address); // debug
-			server.send(socketChannel, REQUEST.getBytes());
+			server.send(socketChannel, REQUEST.getBytes(), id);
 
 			// Wait for this connection to be closed so we can open another
 			synchronized(sync) {
